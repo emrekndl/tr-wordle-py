@@ -1,3 +1,6 @@
+import logging
+
+logger = logging.getLogger(__name__)
 # import unicodedata
 #
 # TR_ALPHABET = [
@@ -43,6 +46,9 @@ def check(guess, word):
     }
     missplaced_letters = set(guess) & set(word) - correct_letters
     wrong_letters = set(guess) - set(word)
+    logger.debug(
+        f"correct_letters: {correct_letters}, missplaced_letters: {missplaced_letters}, wrong_letters: {wrong_letters}, guess: {guess}, word: {word}, is_complete: {len(correct_letters) == 5}"
+    )
 
     return {
         "correct_letters": list(correct_letters),

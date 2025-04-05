@@ -28,3 +28,11 @@ class Gusess_Response(BaseModel):
     incorrect_letters: list[str]
     correct_letters_in_not_correct_position: list[str]
     is_complete: bool = False
+
+
+class Game_Record(Base):
+    __tablename__ = "game_record"
+
+    token = Column(String, primary_key=True, index=True)
+    date = Column(Date, default=date.today)
+    guess_count = Column(Integer, default=0)

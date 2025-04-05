@@ -1,5 +1,8 @@
 import random
 import pathlib
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def trUpper(word):
@@ -31,7 +34,7 @@ def get_random_word(wordlist):
     ]:
         return random.choice(words)
     else:
-        print("No words of length 5 in the word list")
+        logger.error("No words of length 5 in the word list")
         raise SystemExit()
 
 
