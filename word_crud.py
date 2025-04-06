@@ -37,7 +37,7 @@ def get_today_word(db: Session):
         select(Word_Of_The_Day).where(Word_Of_The_Day.date == today)
     ).first()
     logger.debug(f"Today's word: {result[0].word}")
-    return result[0].word
+    return {"word": result[0].word}
 
 
 def get_game_by_token(db: Session, token: str):
