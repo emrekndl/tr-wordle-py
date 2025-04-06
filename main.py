@@ -11,7 +11,7 @@ from database import get_db
 from wordle_utils import init_db
 from wordle_routers import wordle_router
 from log_config import LOGGING_CONFIG
-from db_clear_task import delete_old_game_records
+from clear_task import delete_old_data
 
 
 scheduler = BackgroundScheduler(timezone="Europe/Istanbul")
@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     try:
         init_db(db)
         scheduler.add_job(
-            delete_old_game_records, args=[db], trigger=CronTrigger(hour=0, minute=0)
+            delete_old_data, args=[db], trigger=CronTrigger(hour=0, minute=0)
         )
         scheduler.start()
     finally:
@@ -66,8 +66,8 @@ if __name__ == "__main__":
 # [x] check guess
 # [x] create word
 # [x] get wordlist
-# [ ] get random word( word list len mod)
+# [X] is_complete not correct!!!(same letter in sets not counting)
+# [X] guess only 6 times
+# [ ] get random word( word list len mod), web site crawler
 # [ ] project directory structure setup
 # [ ] word of the day save in cache
-# [X] guess only 5 times
-# [X] is_complete not correct!!!(same letter in sets not counting)

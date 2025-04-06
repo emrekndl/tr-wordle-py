@@ -6,11 +6,11 @@ from random_word import trUpper
 logger = logging.getLogger(__name__)
 
 
-def check(guess: str, word: dict) -> dict:
+def check(guess: str, word: str) -> dict:
     guess = trUpper(guess)
 
     guess_arr = np.array(list(guess))
-    word_arr = np.array(list(word["word"]))
+    word_arr = np.array(list(word))
 
     correct_mask = guess_arr == word_arr
     correct_letters = guess_arr[correct_mask]
