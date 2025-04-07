@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import date
 from sqlalchemy import select
 
-from models import Game_Record
+from db.models import Game_Record
 
 
 logger = logging.getLogger(__name__)

@@ -4,8 +4,8 @@ from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import delete
 
-from models import Game_Record
-from wordle_utils import set_word_to_cache
+from db.models import Game_Record
+from utils.wordle_utils import set_word_to_cache
 
 logger = logging.getLogger(__name__)
 

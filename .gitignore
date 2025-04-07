@@ -12,3 +12,6 @@ wheels/
 # sqlite3 db
 *.sqlite3
 *.db
+
+utils/kelime.py
+utils/word_crawler.py

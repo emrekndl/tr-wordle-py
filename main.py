@@ -7,11 +7,11 @@ from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
-from database import get_db
-from wordle_utils import init_db
-from wordle_routers import wordle_router
+from db.database import get_db
+from utils.wordle_utils import init_db
+from routers.wordle_routers import wordle_router
+from tasks.clear_task import delete_old_data
 from log_config import LOGGING_CONFIG
-from clear_task import delete_old_data
 
 
 scheduler = BackgroundScheduler(timezone="Europe/Istanbul")
@@ -68,6 +68,8 @@ if __name__ == "__main__":
 # [x] get wordlist
 # [X] is_complete not correct!!!(same letter in sets not counting)
 # [X] guess only 6 times
-# [ ] get random word( word list len mod), web site crawler
-# [ ] project directory structure setup
-# [ ] word of the day save in cache
+# [X] get random word( word list len mod), web site crawler
+# [X] project directory structure setup
+# [ ] word of the day save in cache -> need test!
+# [ ] /check not working correctly!!!
+# [ ] check guessed word is valid turkish word (llms,nlp, zemberek-nlp)

@@ -4,10 +4,10 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Response, Cookie
 from sqlalchemy.orm import Session
 
-from word_crud import get_game_by_token
-from models import Word, Guess, Gusess_Response
-from database import get_db
-from wordle_utils import check_guessed_word, set_word_to_cache
+from crud.word_crud import get_game_by_token
+from db.models import Word, Guess, Gusess_Response
+from db.database import get_db
+from utils.wordle_utils import check_guessed_word, set_word_to_cache
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ async def get_word(
         _ = get_game_by_token(db, token)
         set_word_to_cache()
         logger.debug(f"Word of the day created. Word: {set_word_to_cache()}")
-        # word = get_word_of_the_day()
+        # word = get_wordle()
         # return create_word(db, Word(word=word))
         # TODO: Retrun response: "the word of the day is created."
         return {"message": "The word of the day is created."}

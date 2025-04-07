@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Date, Integer, String
 from pydantic.types import StringConstraints
 from typing_extensions import Annotated
-from database import Base
 from datetime import date
-
 from pydantic import BaseModel
+
+from db.database import Base
 
 
 # class Word_Of_The_Day(Base):
@@ -13,6 +13,14 @@ from pydantic import BaseModel
 #     id = Column(Integer, primary_key=True, index=True)
 #     word = Column(String, index=True)
 #     date = Column(Date, default=date.today)
+
+
+class Game_Record(Base):
+    __tablename__ = "game_record"
+
+    token = Column(String, primary_key=True, index=True)
+    date = Column(Date, default=date.today)
+    guess_count = Column(Integer, default=0)
 
 
 class Word(BaseModel):
@@ -28,11 +36,3 @@ class Gusess_Response(BaseModel):
     incorrect_letters: list[str]
     correct_letters_in_not_correct_position: list[str]
     is_complete: bool = False
-
-
-class Game_Record(Base):
-    __tablename__ = "game_record"
-
-    token = Column(String, primary_key=True, index=True)
-    date = Column(Date, default=date.today)
-    guess_count = Column(Integer, default=0)

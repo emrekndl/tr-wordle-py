@@ -3,10 +3,10 @@ from functools import lru_cache
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from database import engine, Base
-from models import Gusess_Response, Game_Record
-from check_word import check
-from random_word import get_wordlist
+from db.database import engine, Base
+from db.models import Gusess_Response, Game_Record
+from utils.check_word import check
+from utils.random_word import get_wordle
 
 
 logger = logging.getLogger(__name__)
@@ -21,11 +21,7 @@ def init_db(db: Session):
 
 @lru_cache(maxsize=1)
 def set_word_to_cache():
-    return get_word_of_the_day()
-
-
-def get_word_of_the_day():
-    return get_wordlist()
+    return get_wordle()
 
 
 def check_guessed_word(guessed_word: str, db: Session, game: Game_Record):
