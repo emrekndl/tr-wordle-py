@@ -15,11 +15,11 @@ def trUpper(word):
     letters_list = {
         "i": "İ",
         "ı": "I",
-        "ü": "Ü",
-        "ğ": "Ğ",
-        "ş": "Ş",
         "ö": "Ö",
+        "ü": "Ü",
         "ç": "Ç",
+        "ş": "Ş",
+        "ğ": "Ğ",
     }
     for letter in word:
         if letter in letters_list:
@@ -59,7 +59,6 @@ def get_wordlist():
     wordlistpath = pathlib.Path(__file__).parent.parent / "data/wordlist.csv"
 
     wordlist = wordlistpath.read_text(encoding="utf-8").splitlines()
-    # WORD = get_random_word(WORDLISTPATH.read_text().split("\n"))
 
     return wordlist
 

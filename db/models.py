@@ -32,7 +32,7 @@ class Guess(BaseModel):
 
 
 class Gusess_Response(BaseModel):
-    correct_letters: list[str]
+    correct_letters: dict[int, str]
     incorrect_letters: list[str]
     correct_letters_in_not_correct_position: list[str]
     is_complete: bool = False

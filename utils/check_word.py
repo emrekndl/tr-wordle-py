@@ -11,60 +11,34 @@ def check(guess: str, word: str) -> dict:
 
     guess_arr = np.array(list(guess))
     word_arr = np.array(list(word))
+    idx_with_correct_letters = dict()
+    correct_letters_in_not_correct_position = []
 
     correct_mask = guess_arr == word_arr
-    correct_letters = guess_arr[correct_mask]
+    remaning_letters_word = word_arr[~correct_mask].tolist()
 
-    remaning_letters = guess_arr[~correct_mask]
-    missplaced_letters = np.intersect1d(remaning_letters, word_arr)
-    wrong_letters = np.setdiff1d(remaning_letters, word_arr)
+    remaning_letters_guess = guess_arr[~correct_mask]
+    wrong_letters = np.setdiff1d(remaning_letters_guess, word_arr)
+
+    for idx, mask in enumerate(correct_mask):
+        if mask:
+            idx_with_correct_letters[idx] = guess_arr.item(idx)
+        else:
+            if guess_arr[idx] not in wrong_letters.tolist():
+                if guess_arr[idx] in remaning_letters_word:
+                    remaning_letters_word.remove(guess_arr[idx])
+                    correct_letters_in_not_correct_position.append(guess_arr.item(idx))
 
     is_complete = np.all(correct_mask)
 
-    logger.debug(f"correct_letters: {correct_letters}")
+    logger.debug(f"correct_letters: {idx_with_correct_letters}")
+    logger.debug(f"missplaced_letters: {correct_letters_in_not_correct_position}")
     logger.debug(f"wrong_letters: {wrong_letters}")
-    logger.debug(f"missplaced_letters: {missplaced_letters}")
     logger.debug(f"is_complete: {is_complete}")
 
     return {
-        "correct_letters": list(correct_letters),
+        "correct_letters": idx_with_correct_letters,
         "incorrect_letters": list(wrong_letters),
-        "correct_letters_in_not_correct_position": list(missplaced_letters),
+        "correct_letters_in_not_correct_position": correct_letters_in_not_correct_position,
         "is_complete": bool(is_complete),
     }
-
-
-# import unicodedata
-#
-# TR_ALPHABET = [
-#     "A",
-#     "B",
-#     "C",
-#     "Ç",
-#     "D",
-#     "E",
-#     "F",
-#     "G",
-#     "Ğ",
-#     "H",
-#     "I",
-#     "İ",
-#     "J",
-#     "K",
-#     "L",
-#     "M",
-#     "N",
-#     "O",
-#     "Ö",
-#     "P",
-#     "R",
-#     "S",
-#     "Ş",
-#     "T",
-#     "U",
-#     "Ü",
-#     "V",
-#     "Y",
-#     "Z",
-# ]
-# normalized_alphabet = [unicodedata.normalize("NFC", char) for char in TR_ALPHABET]

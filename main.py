@@ -2,7 +2,9 @@ import logging
 import logging.config
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -36,6 +38,7 @@ async def lifespan(app: FastAPI):
 
 def get_app(lifespan=lifespan):
     app = FastAPI(lifespan=lifespan, title="Wordle API", version="1.0.0")
+    app.mount("/wordle", StaticFiles(directory="wordle-ui", html=True), name="static")
     app.include_router(wordle_router)
     app.add_middleware(
         CORSMiddleware,
@@ -49,6 +52,16 @@ def get_app(lifespan=lifespan):
 
 
 app = get_app(lifespan=lifespan)
+
+
+@app.get("/api/.*", status_code=404, include_in_schema=False)
+def invalid_api():
+    return None
+
+
+@app.get("/.*", include_in_schema=False)
+def root():
+    return HTMLResponse("wordle-ui/index.html")
 
 
 def main():
@@ -70,6 +83,6 @@ if __name__ == "__main__":
 # [X] guess only 6 times
 # [X] get random word( word list len mod), web site crawler
 # [X] project directory structure setup
-# [ ] word of the day save in cache -> need test!
-# [ ] /check not working correctly!!!
+# [X] word of the day save in cache -> need test!
+# [X] /check not working correctly!!!
 # [ ] check guessed word is valid turkish word (llms,nlp, zemberek-nlp)

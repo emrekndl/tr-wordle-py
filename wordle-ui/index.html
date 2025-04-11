@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wordle - Tanımalı Hekat</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Başlık -->
+      <div class="title">WORDLE - Tanımalı Hekat</div>
+
+      <!-- Oyun ızgarası -->
+      <div class="grid">
+        <!-- 6 satır, her satırda 5 kare -->
+        <div class="row">
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+        </div>
+        <div class="row">
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+        </div>
+        <div class="row">
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+        </div>
+        <div class="row">
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+        </div>
+        <div class="row">
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+        </div>
+        <div class="row">
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+          <div class="square"></div>
+        </div>
+      </div>
+
+      <!-- Klavye -->
+      <div class="keyboard">
+        <div class="keyboard-row">
+          <button class="key">E</button>
+          <button class="key">R</button>
+          <button class="key">T</button>
+          <button class="key">Y</button>
+          <button class="key">U</button>
+          <button class="key">I</button>
+          <button class="key">O</button>
+          <button class="key">P</button>
+          <button class="key">Ğ</button>
+          <button class="key">Ü</button>
+        </div>
+        <div class="keyboard-row">
+          <button class="key">A</button>
+          <button class="key">S</button>
+          <button class="key">D</button>
+          <button class="key">F</button>
+          <button class="key">G</button>
+          <button class="key">H</button>
+          <button class="key">J</button>
+          <button class="key">K</button>
+          <button class="key">L</button>
+          <button class="key">Ş</button>
+          <button class="key">İ</button>
+        </div>
+        <div class="keyboard-row">
+          <button class="key wide" id="enter">Enter</button>
+          <button class="key">Z</button>
+          <button class="key">C</button>
+          <button class="key">V</button>
+          <button class="key">B</button>
+          <button class="key">N</button>
+          <button class="key">M</button>
+          <button class="key">Ö</button>
+          <button class="key">Ç</button>
+          <button class="key wide">⌫</button>
+        </div>
+      </div>
+    </div>
+    <div id="completeModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Günün kelimesini bildiniz!</h2>
+        <p>Tebrikler! Bir sonraki kelime için 24:00'ı bekleyebilirsiniz.</p>
+        <button id="shareButton">Paylaş</button>
+      </div>
+    </div>
+    <script src="js/main.js"></script>
+  </body>
+</html>

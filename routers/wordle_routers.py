@@ -51,4 +51,7 @@ async def check_guess(
         # return get_today_word(db)
     game[0].guess_count += 1
     db.commit()
+    logger.debug(f"Guess count: {game[0].guess_count}")
+    logger.debug(f"Guess word: {guess.guess_word}")
+    logger.debug(f"Word: {set_word_to_cache()}")
     return check_guessed_word(guess.guess_word, db, game)

@@ -15,3 +15,6 @@ wheels/
 
 utils/kelime.py
 utils/word_crawler.py
+
+# vscode
+.vscode/
