@@ -21,7 +21,9 @@ async def get_word(
     logger.debug(f"/wordoftheday token: {token}")
     if token is None:
         token = str(uuid.uuid4())
-        response.set_cookie(key="token", value=token, httponly=True, samesite="lax")
+        response.set_cookie(
+            key="token", value=token, httponly=True, samesite="none", secure=True
+        )
         _ = get_game_by_token(db, token)
         set_word_to_cache()
         logger.debug(f"Word of the day created. Word: {set_word_to_cache()}")

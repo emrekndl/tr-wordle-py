@@ -42,7 +42,14 @@ def get_app(lifespan=lifespan):
     app.include_router(wordle_router)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=[],
+        allow_origin_regex=r"^https://.*\.ngrok-free\.app$",
+        # allow_origins=[
+        #     "http://localhost:8000",
+        #     "http://127.0.0.1:8000",
+        #     "http://0.0.0.0:8000",
+        # ],
+        # allow_credentials=False,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

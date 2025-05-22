@@ -1,7 +1,8 @@
 import logging
-import numpy as np
-from utils.random_word import trUpper
 
+import numpy as np
+
+from utils.random_word import trUpper
 
 logger = logging.getLogger(__name__)
 
