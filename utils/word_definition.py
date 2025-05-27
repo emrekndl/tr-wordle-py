@@ -1,6 +1,6 @@
 import logging
 import requests
-from typing import List
+from typing import List, Dict
 from requests.exceptions import JSONDecodeError
 
 
@@ -27,20 +27,23 @@ session.headers.update(
 )
 
 
-def get_word_definition(word: str) -> List[str]:
+def get_word_definition(word: str) -> Dict:
     """Fetch and parse word definitions from TDK.gov.tr"""
     w = str(word).lower()
+    wd = {}
     try:
         response = session.get(f"https://sozluk.gov.tr/gts?ara={w}", timeout=5)
         response.raise_for_status()
-        return parse_word_definition(response)
+        wd[word] = parse_word_definition(response)
+        # return parse_word_definition(response)
+        return wd
     except (requests.RequestException, JSONDecodeError):
         logger.exception(f"Failed to fetch word definitions: {word}")
-        return []
+        return {}
 
 
 def parse_word_definition(response: requests.Response) -> List[str]:
-    """Extract definitions from API response"""
+    """Extract definitions from url response"""
 
     try:
         json_data = response.json()

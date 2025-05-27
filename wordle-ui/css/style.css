@@ -163,6 +163,29 @@ body {
   border-radius: 8px;
   position: relative;
 }
+.modal-title {
+  font-size: 1.4em;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.modal-word {
+  font-size: 1.6em;
+  font-weight: bold;
+  color: #1d8a23;
+  margin-bottom: 12px;
+}
+
+.definition-list {
+  list-style-type: "• ";
+  padding-left: 1.2em;
+  color: #cccccc;
+}
+
+.definition-list li {
+  margin-bottom: 6px;
+}
 .close {
   position: absolute;
   top: 10px;

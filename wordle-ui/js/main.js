@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             // 3) Oyun tamamlanma kontrolleri
             if (response.is_complete) {
+              // TODO: word_definitioo will be in modal
               setTimeout(() => showCompleteModal(response), 2000);
               disableKeyboard();
             }
@@ -82,9 +83,25 @@ document.addEventListener("DOMContentLoaded", function() {
   function showCompleteModal(response = {}) {
     const modal = document.getElementById("completeModal");
     modal.style.display = "block";
-    // response.word gibi ek bilgiler gösterilebilir
-    if (response.word) {
-      modal.querySelector(".modal-word").textContent = `Günün kelimesi: ${response.word}`;
+    const wordContainer = modal.querySelector(".modal-word");
+    const definitionList = modal.querySelector(".definition-list");
+
+    // önceki tanımları temizle
+    wordContainer.textContent = "";
+    definitionList.innerHTML = "";
+
+    if (response.word_definition) {
+      const word = Object.keys(response.word_definition)[0];
+      const definitions = response.word_definition[word];
+
+      wordContainer.textContent = word;
+
+      // Her tanımı bir <li> olarak ekle
+      definitions.forEach(def => {
+        const li = document.createElement("li");
+        li.textContent = def;
+        definitionList.appendChild(li);
+      });
     }
   }
 

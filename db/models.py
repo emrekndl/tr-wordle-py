@@ -2,7 +2,7 @@ from sqlalchemy import Column, Date, Integer, String
 from pydantic.types import StringConstraints
 from typing_extensions import Annotated
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from db.database import Base
 
@@ -32,7 +32,16 @@ class Guess(BaseModel):
 
 
 class Gusess_Response(BaseModel):
+    """Guess Response
+    correct_letters: dict
+    incorrect_letters: list
+    correct_letters_in_not_correct_position: list
+    is_complete: bool
+    word_definition: dict
+    """
+
     correct_letters: dict[int, str]
     incorrect_letters: list[str]
     correct_letters_in_not_correct_position: list[str]
     is_complete: bool = False
+    word_definition: dict[str, list[str]] = Field(default_factory=dict)

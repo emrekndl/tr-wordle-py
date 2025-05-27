@@ -7,7 +7,11 @@ from sqlalchemy.orm import Session
 from crud.word_crud import get_game_by_token
 from db.models import Word, Guess, Gusess_Response
 from db.database import get_db
-from utils.wordle_utils import check_guessed_word, set_word_to_cache
+from utils.wordle_utils import (
+    check_guessed_word,
+    set_word_to_cache,
+    set_word_definition_to_cache,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +33,8 @@ async def get_word(
         logger.debug(f"Word of the day created. Word: {set_word_to_cache()}")
         # word = get_wordle()
         # return create_word(db, Word(word=word))
-        # TODO: Retrun response: "the word of the day is created."
         return {"message": "The word of the day is created."}
 
-    # TODO: Retrun response: "the word of the day is already created."
     # return get_today_word(db)
     return {"message": "The word of the day is already created."}
 
@@ -49,8 +51,8 @@ async def check_guess(
         raise HTTPException(status_code=401, detail="No token provided.")
     game = get_game_by_token(db, token)
     if game[0].guess_count >= 6:
-        return {"word": set_word_to_cache()}  # set_word_to_cache()
-        # return get_today_word(db)
+        return set_word_definition_to_cache(set_word_to_cache())
+        # return {"word": set_word_to_cache()}
     game[0].guess_count += 1
     db.commit()
     logger.debug(f"Guess count: {game[0].guess_count}")

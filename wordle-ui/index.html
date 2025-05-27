@@ -3,13 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wordle - Tanımalı Hekat</title>
+    <title>Tanımalı Hekat (Wordle)</title>
+    <!-- <link rel="icon" type="image/x-icon" sizes="16x16" href="/favicon-16.png"> -->
+    <!-- <link rel="icon" href="/favicon.ico"> -->
+    <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div class="container">
       <!-- Başlık -->
-      <div class="title">WORDLE - Tanımalı Hekat</div>
+      <div class="title">Tanımalı Hekat (Wordle)</div>
 
       <!-- Oyun ızgarası -->
       <div class="grid">
@@ -102,8 +105,9 @@
     <div id="completeModal" class="modal">
       <div class="modal-content">
         <span class="close" id="closeModal">&times;</span>
-        <h2>Günün kelimesini bildiniz!</h2>
-        <p>Tebrikler!</p>
+        <h2>Tebrikler.</h2>
+        <div class="modal-word"></div>
+    <ul class="definition-list"></ul>
         <button id="shareButton">Paylaş</button>
       </div>
     </div>

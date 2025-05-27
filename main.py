@@ -92,4 +92,4 @@ if __name__ == "__main__":
 # [X] project directory structure setup
 # [X] word of the day save in cache -> need test!
 # [X] /check not working correctly!!!
-# [ ] check guessed word is valid turkish word (llms,nlp, zemberek-nlp)
+# [ ] check guessed word is valid turkish word (bloomfilter, wasm)
