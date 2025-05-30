@@ -1,3 +1,5 @@
+import { checkWord} from "./bloom_filter.js";
+
 // Global değişkenler (callback dışına alındı)
 let currentRow = 0;
 let currentSquareIndex = 0;
@@ -10,10 +12,11 @@ const API_BASE = `${window.location.origin}/api/wordle`;
 document.addEventListener("DOMContentLoaded", function() {
   const rows = document.querySelectorAll(".grid .row");
   const keyButtons = document.querySelectorAll(".key");
+  
 
   fetchWordOfTheDay();
   loadGameState();
-
+  
   keyButtons.forEach(keyButton => {
     keyButton.addEventListener("mousedown", function(e) {
       e.preventDefault(); // Browserin default buton davranışını engelle
@@ -24,6 +27,12 @@ document.addEventListener("DOMContentLoaded", function() {
       if (key === "Enter") {
         if (currentSquareIndex === maxSquares) {
           const guess = getCurrentGuess();
+          // TODO: BLOOM FILTER İLE KONTROL ET
+          // Önce Bloom Filter ile kelimeyi kontrol et
+          // if (!checkGuess(guess)) {
+          //     alert("Bu kelime Türkçe sözlükte bulunamadı!");
+          //     return;
+          // }
           checkGuess(guess).then(response => {
             if (!response) {
               alert("API'den yanıt alınamadı.");
@@ -51,7 +60,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
             // 3) Oyun tamamlanma kontrolleri
             if (response.is_complete) {
-              // TODO: word_definitioo will be in modal
               setTimeout(() => showCompleteModal(response), 2000);
               disableKeyboard();
             }
