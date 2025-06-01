@@ -1,4 +1,7 @@
 #include "trie.h"
+#include <algorithm>
+#include <cctype>
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -16,10 +19,18 @@ struct Node {
 
 static unique_ptr<Node> root;
 
+// void to_lower(char *str) {
+//   while (*str) {
+//     *str = tolower(static_cast<unsigned char>(*str));
+//     ++str;
+//   }
+// }
+
 extern "C" void init_trie(const char **words, int count) {
   root = make_unique<Node>();
 
   for (int i = 0; i < count; i++) {
+    // to_lower(words[i]);
     const char *w = words[i];
     Node *current = root.get();
 
@@ -36,7 +47,7 @@ extern "C" void init_trie(const char **words, int count) {
 
 extern "C" bool trie_contains(const char *word) {
   Node *current = root.get();
-
+  // to_lower(word);
   for (int i = 0; word[i]; i++) {
     char c = word[i];
     auto it = current->next.find(c);
@@ -48,15 +59,30 @@ extern "C" bool trie_contains(const char *word) {
   return current->end;
 }
 
+static string trim(const string &s) {
+  size_t b = 0, e = s.size();
+  while (b < e && (s[b] == ' ' || s[b] == '\t' || s[b] == '\r' || s[b] == '\n'))
+    ++b;
+  while (e > b && (s[e - 1] == ' ' || s[e - 1] == '\t' || s[e - 1] == '\r' ||
+                   s[e - 1] == '\n'))
+    --e;
+  return s.substr(b, e - b);
+}
+
 static vector<string> load_words(const string &path) {
   vector<string> words;
   ifstream file(path);
   string line;
+  if (!file.is_open()) {
+    cerr << "File opening error! " << path << "\n";
+    return words;
+  }
 
   while (getline(file, line)) {
     istringstream ss(line);
     string w;
     while (getline(ss, w, ',')) {
+      w = trim(w);
       if (!w.empty()) {
         words.push_back(w);
       }
@@ -72,6 +98,10 @@ int main(int argc, char *argv[]) {
   }
 
   auto vec = load_words(argv[1]);
+  cout << "Loading word counts: " << vec.size() << "\n";
+  for (size_t i = 0; i < min(vec.size(), size_t(5)); i++) {
+    cout << " [" << i << "] = \"" << vec[i] << "\"\n";
+  }
   vector<const char *> c_words;
   c_words.reserve(vec.size());
 
@@ -86,6 +116,7 @@ int main(int argc, char *argv[]) {
   while (cin >> query) {
     cout << query << " -> " << (trie_contains(query.c_str()) ? "Yes" : "No")
          << "\n";
+    cout << "Search word: ";
   }
 
   return 0;
