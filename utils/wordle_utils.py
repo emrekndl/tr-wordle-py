@@ -30,7 +30,7 @@ def set_word_to_cache():
 def set_word_definition_to_cache(word: str) -> Dict:
     """Word_Of_The_Day with definitions
     {
-    "word_of_the_day": ["word_definition",...]
+    "word_of_the_day": ["word_definition_1",...]
     }
     """
     return get_word_definition(word)
@@ -46,6 +46,7 @@ def check_guessed_word(guessed_word: str, db: Session, game: Game_Record):
 
         res.word_definition = set_word_definition_to_cache(word)
         logger.debug(f"word_definition: {res.word_definition}")
-
+    if not res.is_complete and game[0].guess_count == 6:
+        res.word_definition = set_word_definition_to_cache(word)
     logger.debug(f"Guesss_Response: {res}")
     return res

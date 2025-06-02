@@ -45,14 +45,35 @@ class BloomFilter {
             this.bitset[byteIndex] |= (1 << bitIndex);
         }
     }
+
+    // Function to test words
+    testWord(word) {
+        const indexes = this._getIndexes(word);
+        console.log(`Testing word "${word}":`);
+        console.log('Hash indexes:', indexes);
+        
+        for (const index of indexes) {
+            const byteIndex = index >> 3;
+            const bitIndex = index & 7;
+            const bit = !!(this.bitset[byteIndex] & (1 << bitIndex));
+            if (!bit) {
+                console.log(`  Not found - missing bit at: byte=${byteIndex}, bit=${bitIndex}, index=${index}`);
+                return false;
+            }
+        }
+        console.log('  Word found - all bits set');
+        return true;
+    }
 }
 
 async function generateBloomFilter() {
     try {
-        // Read wordlist.csv
-        const wordlistPath = path.join(__dirname, '..', 'data', 'wordlist.csv');
-        const csvContent = await fs.readFile(wordlistPath, 'utf8');
-        const words = csvContent.split('\n').filter(word => word.trim());
+        // Read wordlist.txt
+        const wordlistPath = path.join(__dirname, '..', 'data', 'wordlist.txt');
+        console.log('Reading wordlist from:', wordlistPath);
+        
+        const textContent = await fs.readFile(wordlistPath, 'utf8');
+        const words = textContent.split('\n').filter(word => word.trim());
 
         // Create Bloom Filter with same parameters as Go implementation
         const size = 81708;  // m value
@@ -61,14 +82,38 @@ async function generateBloomFilter() {
 
         // Add all words
         console.log('Adding words to Bloom Filter...');
-        words.forEach(word => filter.add(word.trim()));
-
-        // Convert bitset to base64
-        let binary = '';
-        for (let i = 0; i < filter.bitset.length; i++) {
-            binary += String.fromCharCode(filter.bitset[i]);
+        for (const word of words) {
+            const trimmedWord = word.trim().toLowerCase();
+            if (trimmedWord) {
+                filter.add(trimmedWord);
+            }
         }
-        const base64Data = Buffer.from(binary).toString('base64');
+
+        // Test some known words
+        const testWords = ['elmas', 'kalem', 'kitap', 'araba', 'xxxxx'];
+        console.log('\nTesting words:');
+        for (const word of testWords) {
+            filter.testWord(word);
+        }
+
+        // Calculate expected size and validate
+        const expectedBytes = Math.ceil(filter.size / 8);
+        console.log('Bitset stats:', {
+            length: filter.bitset.length,
+            expectedBytes,
+            match: filter.bitset.length === expectedBytes
+        });
+        
+        // Convert Uint8Array to base64
+        const base64Data = Buffer.from(filter.bitset).toString('base64');
+        
+        // Log conversion details
+        console.log('Bloom Filter conversion:', {
+            bitsetLength: filter.bitset.length,
+            base64Length: base64Data.length,
+            firstByte: filter.bitset[0].toString(16),
+            sampleBits: Array.from(filter.bitset.slice(0, 4)).map(b => b.toString(2).padStart(8, '0'))
+        });
 
         // Create JSON data
         const data = {
@@ -85,7 +130,7 @@ async function generateBloomFilter() {
         const outputPath = path.join(__dirname, '..', 'wordle-ui', 'bloom_data.json');
         await fs.writeFile(outputPath, JSON.stringify(data, null, 2));
         
-        console.log('Successfully created bloom_data.json');
+        console.log(`\nSuccessfully created bloom_data.json`);
         console.log(`Total words processed: ${words.length}`);
         console.log(`Filter size: ${size} bits`);
         console.log(`Number of hash functions: ${numHashes}`);

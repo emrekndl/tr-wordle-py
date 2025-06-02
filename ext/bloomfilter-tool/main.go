@@ -1,14 +1,13 @@
 package main
 
 import (
-	"encoding/csv"
+	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"os"
 )
 
-func readCsvFile(filename string) []string {
+func readFile(filename string) []string {
 
 	var wordList []string
 	file, err := os.Open(filename)
@@ -17,20 +16,16 @@ func readCsvFile(filename string) []string {
 	}
 	defer file.Close()
 
-	csvReader := csv.NewReader(file)
-	for {
-		rec, err := csvReader.Read()
-
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// fmt.Printf("%+v\n", rec)
-		wordList = append(wordList, rec[0])
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		// fmt.Println(scanner.Text())
+		wordList = append(wordList, scanner.Text())
 	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
 	return wordList
 }
 
@@ -53,19 +48,19 @@ func main() {
 	k := 10    // hash func size
 	bf := NewBloomFilter(m, k)
 
-	wordllist := readCsvFile("../../data/wordlist.csv")
+	// wordllist := readFile("../../data/wordlist.txt")
 
 	bf.AddWordList(wordllist)
 
-	// bf.Add("bloom")
-	// bf.Add("filter")
+	bf.Add("bloom")
+	bf.Add("filter")
 
 	fmt.Println("türki", bf.Contains("türki"))
 	fmt.Println("dünya", bf.Contains("dünya"))
 	fmt.Println("defer", bf.Contains("defer"))
-	fmt.Println("asdfg", bf.Contains("asdfg"))
+	fmt.Println("bloom", bf.Contains("bloom"))
 	fmt.Println("xqdmw", bf.Contains("xqdmw"))
-	fmt.Println("örnek", bf.Contains("örnek"))
+	fmt.Println("filter", bf.Contains("filer"))
 
 	// err := bf.ExportToJSON("bloom_data.json", k)
 	// if err != nil {

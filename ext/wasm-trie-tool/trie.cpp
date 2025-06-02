@@ -1,16 +1,16 @@
 #include "trie.h"
-#include <algorithm>
-#include <cctype>
-#include <cstddef>
+// #include <cstddef>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <sstream>
-#include <string>
+// #include <sstream>
+// #include <string>
 #include <unordered_map>
 #include <vector>
 
 using namespace std;
+
 
 struct Node {
   bool end = false;
@@ -19,12 +19,6 @@ struct Node {
 
 static unique_ptr<Node> root;
 
-// void to_lower(char *str) {
-//   while (*str) {
-//     *str = tolower(static_cast<unsigned char>(*str));
-//     ++str;
-//   }
-// }
 
 extern "C" void init_trie(const char **words, int count) {
   root = make_unique<Node>();
@@ -59,65 +53,75 @@ extern "C" bool trie_contains(const char *word) {
   return current->end;
 }
 
-static string trim(const string &s) {
-  size_t b = 0, e = s.size();
-  while (b < e && (s[b] == ' ' || s[b] == '\t' || s[b] == '\r' || s[b] == '\n'))
-    ++b;
-  while (e > b && (s[e - 1] == ' ' || s[e - 1] == '\t' || s[e - 1] == '\r' ||
-                   s[e - 1] == '\n'))
-    --e;
-  return s.substr(b, e - b);
+
+
+extern "C" void init_trie_from_bin() {
+  FILE* bin_file = fopen("words.dat", "rb");
+  if (bin_file == NULL) {
+      std::cout << "Not found!";
+      exit(-1);
+  }
+  char *data[5];
+  fread(&data,sizeof(char), 5, bin_file);
+  std::cout << data;
+
+  // ifstream file("words.dat", ios::binary);
+  // vector<char> buffer((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+
+  // vector<const char*> wordPtrs;
+  // char* ptr = buffer.data();
+  // while (ptr < buffer.data() + buffer.size()) {
+  //   wordPtrs.push_back(ptr);
+  //   ptr += strlen(ptr) + 1;
+  // }
+  //
+  // init_trie(wordPtrs.data(), wordPtrs.size());
 }
 
-static vector<string> load_words(const string &path) {
-  vector<string> words;
-  ifstream file(path);
-  string line;
-  if (!file.is_open()) {
-    cerr << "File opening error! " << path << "\n";
-    return words;
-  }
+// static string trim(const string &s) {
+//   size_t b = 0, e = s.size();
+//   while (b < e && (s[b] == ' ' || s[b] == '\t' || s[b] == '\r' || s[b] == '\n'))
+//     ++b;
+//   while (e > b && (s[e - 1] == ' ' || s[e - 1] == '\t' || s[e - 1] == '\r' ||
+//                    s[e - 1] == '\n'))
+//     --e;
+//   return s.substr(b, e - b);
+// }
 
-  while (getline(file, line)) {
-    istringstream ss(line);
-    string w;
-    while (getline(ss, w, ',')) {
-      w = trim(w);
-      if (!w.empty()) {
-        words.push_back(w);
-      }
-    }
-  }
-  return words;
-}
+// static vector<string> load_words(const string &path) {
+//   vector<string> words;
+//   ifstream file(path);
+//   string line;
+//   if (!file.is_open()) {
+//     cerr << "File opening error! " << path << "\n";
+//     return words;
+//   }
+//
+//   while (getline(file, line)) {
+//     istringstream ss(line);
+//     string w;
+//     while (getline(ss, w, ',')) {
+//       w = trim(w);
+//       if (!w.empty()) {
+//         words.push_back(w);
+//       }
+//     }
+//   }
+//   return words;
+// }
+
 
 int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    cerr << "Usage: " << argv[0] << " word_list.csv\n";
-    return 1;
-  }
+    
+  init_trie_from_bin();
 
-  auto vec = load_words(argv[1]);
-  cout << "Loading word counts: " << vec.size() << "\n";
-  for (size_t i = 0; i < min(vec.size(), size_t(5)); i++) {
-    cout << " [" << i << "] = \"" << vec[i] << "\"\n";
-  }
-  vector<const char *> c_words;
-  c_words.reserve(vec.size());
-
-  for (auto &w : vec) {
-    c_words.push_back(w.c_str());
-  }
-
-  init_trie(c_words.data(), int(c_words.size()));
-
-  string query;
-  cout << "Search word: ";
-  while (cin >> query) {
-    cout << query << " -> " << (trie_contains(query.c_str()) ? "Yes" : "No")
-         << "\n";
-    cout << "Search word: ";
-  }
+  // string query;
+  // cout << "Search word: ";
+  // while (cin >> query) {
+  //   cout << query << " -> " << (trie_contains(query.c_str()) ? "Yes" : "No")
+  //        << "\n";
+  //   cout << "Search word: ";
+  // }
 
   return 0;
 }

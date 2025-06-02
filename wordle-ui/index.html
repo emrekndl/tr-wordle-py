@@ -8,11 +8,18 @@
     <!-- <link rel="icon" href="/favicon.ico"> -->
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   </head>
   <body>
     <div class="container">
       <!-- Başlık -->
-      <div class="title">Tanımalı Hekat (Wordle)</div>
+      <div class="title-container">
+        <div class="title">
+            <div class="word" id="word1"></div>
+            <div class="word" id="word2"></div>
+        </div>
+    </div>
+      <!-- <div class="title">Tanımalı Hekat (Wordle)</div> -->
 
       <!-- Oyun ızgarası -->
       <div class="grid">
@@ -105,12 +112,50 @@
     <div id="completeModal" class="modal">
       <div class="modal-content">
         <span class="close" id="closeModal">&times;</span>
-        <h2>Tebrikler.</h2>
+        <div class="modal-header">
+          <h2></h2>
+          <div class="attempt-count"></div>
+        </div>
         <div class="modal-word"></div>
-    <ul class="definition-list"></ul>
-        <button id="shareButton">Paylaş</button>
+        <ul class="definition-list"></ul>
+        <button id="shareButton"><i class="fas fa-share-alt icon"></i>Paylaş</button>
       </div>
     </div>
     <script type="module" src="js/main.js"></script>
+    <script>
+        // Kelimeleri ayır
+        const word1 = "TANIMALI";
+        const word2 = "HEKAT";
+        
+        // Wordle renk sınıfları
+        const colors = ['color-1', 'color-2', 'color-3', 'color-4'];
+        
+        // İlk kelime için harfleri oluştur
+        const word1Element = document.getElementById('word1');
+        for (let i = 0; i < word1.length; i++) {
+            const char = word1[i];
+            const letter = document.createElement('div');
+            letter.className = 'letter';
+            letter.textContent = char;
+            // Rastgele bir renk sınıfı seç
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            letter.classList.add(randomColor);
+            word1Element.appendChild(letter);
+        }
+        
+        // İkinci kelime için harfleri oluştur
+        const word2Element = document.getElementById('word2');
+        for (let i = 0; i < word2.length; i++) {
+            const char = word2[i];
+            const letter = document.createElement('div');
+            letter.className = 'letter';
+            letter.textContent = char;
+            // Rastgele bir renk sınıfı seç
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            letter.classList.add(randomColor);
+            word2Element.appendChild(letter);
+        }
+    </script>
+
   </body>
 </html>

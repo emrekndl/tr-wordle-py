@@ -1,24 +1,32 @@
-import { checkWord} from "./bloom_filter.js";
+import { initializeBloomFilter, checkWordInBloomFilter } from "./initialize_bloom.js";
 
-// Global değişkenler (callback dışına alındı)
+// Global değişkenler
 let currentRow = 0;
 let currentSquareIndex = 0;
 const maxRows = 6;
 const maxSquares = 5;
+const usedGuesses = new Set(); // Kullanılan tahminleri takip etmek için
+let rows; // Grid satırları için global değişken
+
+function toLocaleLowerCase(str) {
+  return str.toLocaleLowerCase('tr-TR');
+}
 
 // const API_BASE = "http://localhost:8000/api/wordle";
 const API_BASE = `${window.location.origin}/api/wordle`;
 
-document.addEventListener("DOMContentLoaded", function() {
-  const rows = document.querySelectorAll(".grid .row");
+document.addEventListener("DOMContentLoaded", async function() {
+  rows = document.querySelectorAll(".grid .row"); // Global rows değişkenini initialize et
   const keyButtons = document.querySelectorAll(".key");
   
-
+  // Bloom Filter'ı yükle
+  await initializeBloomFilter();
+  
   fetchWordOfTheDay();
   loadGameState();
   
   keyButtons.forEach(keyButton => {
-    keyButton.addEventListener("mousedown", function(e) {
+    keyButton.addEventListener("mousedown", async function(e) {
       e.preventDefault(); // Browserin default buton davranışını engelle
       const key = this.textContent.trim();
       // Eğer klavye disable ise hiçbir tuş işlenmesin
@@ -27,42 +35,82 @@ document.addEventListener("DOMContentLoaded", function() {
       if (key === "Enter") {
         if (currentSquareIndex === maxSquares) {
           const guess = getCurrentGuess();
-          // TODO: BLOOM FILTER İLE KONTROL ET
+          // Daha önce kullanılan tahmini kontrol et
+          if (usedGuesses.has(guess)) {
+            alert("Bu kelimeyi daha önce denediniz!");
+            // Geçersiz kelimeyi gridten sil ve squares'i sıfırla
+            const squares = rows[currentRow].querySelectorAll(".square");
+            squares.forEach(square => {
+                square.textContent = "";
+                square.classList.remove("flip", "correct", "misplaced", "incorrect");
+            });
+            currentSquareIndex = 0;
+            return;
+          }
           // Önce Bloom Filter ile kelimeyi kontrol et
-          // if (!checkGuess(guess)) {
-          //     alert("Bu kelime Türkçe sözlükte bulunamadı!");
-          //     return;
-          // }
+          const lowercaseGuess = toLocaleLowerCase(guess);
+          console.log("Kelime kontrol ediliyor:", lowercaseGuess);
+          try {
+            const isValidWord = await checkWordInBloomFilter(lowercaseGuess);
+            if (!isValidWord) {
+              console.log("Kelime sözlükte bulunamadı");
+              alert("Bu kelime Türkçe sözlükte bulunamadı!");
+              return;
+            }
+          } catch (error) {
+            console.error("Bloom filter kontrolünde hata:", error);
+          }
+          
+          // Tahmin geçerli, usedGuesses'e ekle
+          usedGuesses.add(guess);
           checkGuess(guess).then(response => {
             if (!response) {
               alert("API'den yanıt alınamadı.");
               return;
             }
+            
+            // Animasyonları başlat
             animateRow(currentRow, response, function() {
-              // saveGameState(response.is_complete);
-              // if (response.is_complete === true) {
-              //   setTimeout(() => showCompleteModal(response), 2000);
-              //   disableKeyboard();
-              // } else if (currentRow < maxRows - 1) {
-              //   currentRow++;
-              //   currentSquareIndex = 0;
-              // } else {
-              //   alert("Oyununuz tamamlandı.");
-              //   disableKeyboard();
-              // }
-              if (!response.is_complete && currentRow < maxRows - 1) {
-              currentRow++;
-              currentSquareIndex = 0;
-            }
+              // Animasyonlar bittikten sonra state'i kaydet
+              setTimeout(() => {
+                saveGameState(false);
+              }, 1500);
+              // Animasyon tamamlandıktan sonra state'i kaydet
+              setTimeout(() => {
+                saveGameState(false);
+              }, 500);
 
-            // 2) Güncel row/index ile kaydetme
-            saveGameState(response.is_complete);
+              // Doğru tahmin kontrolü
+              let isCorrectGuess = false;
+              if (response.correct_letters) {
+                const correctLetters = Object.values(response.correct_letters);
+                isCorrectGuess = correctLetters.length === maxSquares;
+              }
 
-            // 3) Oyun tamamlanma kontrolleri
-            if (response.is_complete) {
-              setTimeout(() => showCompleteModal(response), 2000);
-              disableKeyboard();
-            }
+              // Son satır kontrolü
+              const isLastRow = currentRow >= maxRows - 1;
+
+              if (!isCorrectGuess && !isLastRow) {
+                currentRow++;
+                currentSquareIndex = 0;
+              } else {
+                // Modal data hazırla
+                const modalData = {
+                  title: isCorrectGuess ? "Tebrikler 🎉" : "Oyun Bitti!",
+                  word: Object.keys(response.word_definition || response)[0],
+                  definitions: response.word_definition ? 
+                    response.word_definition[Object.keys(response.word_definition)[0]] :
+                    response[Object.keys(response)[0]],
+                  attemptCount: `${currentRow + 1}/${maxRows}`,
+                  isComplete: isCorrectGuess
+                };
+
+                // State'i kaydet ve modalı göster
+                saveGameState(true, modalData);
+                setTimeout(() => showCompleteModal(response), 2000);
+                createConfetti();
+                disableKeyboard();
+              }
             });
           });
         } else {
@@ -88,30 +136,70 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 
-  function showCompleteModal(response = {}) {
+  function showCompleteModal(response = {}, savedModalState = null) {
     const modal = document.getElementById("completeModal");
     modal.style.display = "block";
     const wordContainer = modal.querySelector(".modal-word");
     const definitionList = modal.querySelector(".definition-list");
+    const modalTitle = modal.querySelector("h2");
+    const attemptCount = modal.querySelector(".attempt-count");
 
     // önceki tanımları temizle
     wordContainer.textContent = "";
     definitionList.innerHTML = "";
 
-    if (response.word_definition) {
-      const word = Object.keys(response.word_definition)[0];
-      const definitions = response.word_definition[word];
+    let modalData = null;
 
-      wordContainer.textContent = word;
-
-      // Her tanımı bir <li> olarak ekle
-      definitions.forEach(def => {
+    if (savedModalState) {
+      // Kaydedilmiş modal verilerini kullan
+      modalTitle.textContent = savedModalState.title;
+      wordContainer.textContent = savedModalState.word;
+      savedModalState.definitions.forEach(def => {
         const li = document.createElement("li");
         li.textContent = def;
         definitionList.appendChild(li);
       });
+      attemptCount.textContent = savedModalState.attemptCount;
+      attemptCount.style.color = savedModalState.isComplete ? "#6aaa64" : "#dc3545";
+    } else {
+      // Yeni oyun - API yanıtını kullan
+      attemptCount.textContent = `${currentRow + 1}/${maxRows}`;
+      
+      // Renklendirme için doğru/yanlış kontrolü
+      let isCorrectGuess = false;
+      if (response.correct_letters) {
+        const correctLetters = Object.values(response.correct_letters);
+        isCorrectGuess = correctLetters.length === maxSquares;
+      }
+      
+      attemptCount.style.color = isCorrectGuess ? "#6aaa64" : "#dc3545";
+      
+      if (isCorrectGuess) {
+        modalTitle.textContent = " Tebrikler 🎉";
+      } else {
+        modalTitle.textContent = "Oyun Bitti!";
+      }
+
+      // Kelime ve tanım bilgisi iki farklı formatta gelebilir
+      let word, definitions;
+      if (response.word_definition) {
+        word = Object.keys(response.word_definition)[0];
+        definitions = response.word_definition[word];
+      } else if (Object.keys(response).length > 0) {
+        word = Object.keys(response)[0];
+        definitions = response[word];
+      }
+
+      if (word && definitions) {
+        wordContainer.textContent = word;
+        definitions.forEach(def => {
+          const li = document.createElement("li");
+          li.textContent = def;
+          definitionList.appendChild(li);
+        });
+      }
     }
-  }
+}
 
   function closeModal() {
     document.getElementById("completeModal").style.display = "none";
@@ -146,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ guess_word: guessWord })
+        body: JSON.stringify({ guess_word: toLocaleLowerCase(guessWord) })
       });
       if (!response.ok) {
         throw new Error("API hatası: " + response.statusText);
@@ -161,70 +249,63 @@ document.addEventListener("DOMContentLoaded", function() {
   function animateRow(rowIndex, result, callback) {
     const row = rows[rowIndex];
     const squares = row.querySelectorAll(".square");
-    // let misplacedLetters = [...result.correct_letters_in_not_correct_position];
-    // const correctMap = result.correct_letters || {};                              // {} default
-   // 1) correctMap: string-key → number-key
-  const correctMap = {};
-  if (result.correct_letters) {
-    for (const [k, v] of Object.entries(result.correct_letters)) {
-      correctMap[Number(k)] = v;
+    
+    // API'den gelen yanıtı düzenle
+    const correctMap = {};
+    if (result.correct_letters) {
+      Object.entries(result.correct_letters).forEach(([k, v]) => {
+        correctMap[parseInt(k)] = v;
+      });
     }
-  }
-  const misplacedLetters = Array.isArray(result.correct_letters_in_not_correct_position)
-    ? [...result.correct_letters_in_not_correct_position]
-    : [];                                                                      // [] default
-  const incorrectLetters = Array.isArray(result.incorrect_letters)
-    ? result.incorrect_letters
-    : [];                                                                      //
-    // squares.forEach((square, index) => {
-    //   setTimeout(() => {
-    //     square.classList.add("flip");
-    //     const letter = square.textContent;
-    //     if (result.correct_letters.hasOwnProperty(index.toString()) && letter === result.correct_letters[index.toString()]) {
-    //       square.classList.add("correct");
-    //       updateKeyboardColor(letter, "correct");
-    //     } else if (misplacedLetters.includes(letter)) {
-    //       misplacedLetters.splice(misplacedLetters.indexOf(letter), 1);
-    //       square.classList.add("misplaced");
-    //       updateKeyboardColor(letter, "misplaced");
-    //     } else if (result.incorrect_letters.includes(letter)) {
-    //       square.classList.add("incorrect");
-    //       updateKeyboardColor(letter, "incorrect");
-    //     }
-    //     // Son karedeysek ve callback varsa çağır
-    //     if (index === squares.length - 1 && typeof callback === "function") {
-    //       setTimeout(callback, 350); // animasyonun bitmesini bekle
-    //     }
-    //   }, index * 300);
+    
+    const misplacedLetters = Array.isArray(result.correct_letters_in_not_correct_position) 
+      ? [...result.correct_letters_in_not_correct_position]
+      : [];
+      
+    const incorrectLetters = Array.isArray(result.incorrect_letters)
+      ? result.incorrect_letters
+      : [];
+
+    // Tüm harflerin doğru olup olmadığını kontrol et
+    let allCorrect = true;
     squares.forEach((square, index) => {
-    setTimeout(() => {
-      square.classList.add("flip");
-      const letter = square.textContent;
-
-      // 2) Doğru pozisyona bak
-      if (correctMap.hasOwnProperty(index) && letter === correctMap[index]) {
-        square.classList.add("correct");
-        updateKeyboardColor(letter, "correct");
-
-      // 3) Yanlış pozisyondaki harfler
-      } else if (misplacedLetters.includes(letter)) {
-        misplacedLetters.splice(misplacedLetters.indexOf(letter), 1);
-        square.classList.add("misplaced");
-        updateKeyboardColor(letter, "misplaced");
-
-      // 4) Tamamen yanlış harfler
-      } else if (incorrectLetters.includes(letter)) {
-        square.classList.add("incorrect");
-        updateKeyboardColor(letter, "incorrect");
+      const letter = toLocaleLowerCase(square.textContent);
+      if (!correctMap.hasOwnProperty(index) || correctMap[index] !== letter) {
+        allCorrect = false;
       }
-
-      // 5) Callback’i son karede çalıştır
-      if (index === squares.length - 1 && typeof callback === "function") {
-        setTimeout(callback, 350);
-      }
-    }, index * 300);
     });
-  }
+  
+    squares.forEach((square, index) => {
+      setTimeout(() => {
+        // Önce flip animasyonunu başlat
+        square.classList.add("flip");
+        
+        const letter = square.textContent;
+        const letterLower = toLocaleLowerCase(letter);
+
+        let colorClass = 'incorrect';
+        // Tüm kelime doğruysa veya doğru pozisyondaki harf ise
+        if (allCorrect || (correctMap.hasOwnProperty(index) && correctMap[index] === letterLower)) {
+          colorClass = 'correct';
+        }
+        // Yanlış pozisyondaki harfler için kontrol
+        else if (misplacedLetters.map(l => toLocaleLowerCase(l)).includes(letterLower)) {
+          colorClass = 'misplaced';
+        }
+
+        // Renk sınıfını ekle ve klavyeyi güncelle
+        setTimeout(() => {
+          square.classList.add(colorClass);
+          updateKeyboardColor(letter, colorClass);
+        }, 250); // Flip animasyonunun ortasında rengi değiştir
+
+        // Callback'i son karede çalıştır
+        if (index === squares.length - 1 && typeof callback === "function") {
+          setTimeout(callback, 350);
+        }
+      }, index * 300);
+    });
+}
 
   function fetchWordOfTheDay() {
     fetch(`${API_BASE}/wordoftheday`, {
@@ -238,71 +319,211 @@ document.addEventListener("DOMContentLoaded", function() {
     // .catch(err => console.error("Günün kelimesi alınamadı:", err));
   }
 
-  function updateKeyboardColor(letter, statusClass) {
-    const keyButton = Array.from(document.querySelectorAll(".key")).find(btn => btn.textContent.trim().toUpperCase() === letter.toUpperCase());
-    if (keyButton) {
-      keyButton.classList.remove("correct", "misplaced", "incorrect");
-      keyButton.classList.add(statusClass);
+  function updateKeyboardColor(letter, state) {
+    // Klavyedeki tuşu textContent ile bul
+    const upperLetter = letter.toUpperCase();
+    const keyElement = Array.from(document.querySelectorAll('.key')).find(key => 
+        key.textContent.trim() === upperLetter
+    );
+    
+    if (!keyElement) {
+        console.log("Key element not found for:", upperLetter);
+        return;
     }
-  }
+    
+    const colorPriority = {
+        'correct': 3,
+        'misplaced': 2,
+        'incorrect': 1,
+        'unused': 0
+    };
 
-  function saveGameState(isComplete = false) {
+    const currentState = Object.keys(colorPriority).find(className => 
+        keyElement.classList.contains(className)
+    ) || 'unused';
+
+    // Sadece daha yüksek öncelikli durum varsa güncelle
+    if (colorPriority[state] > colorPriority[currentState]) {
+        // Önceki renk sınıflarını kaldır
+        Object.keys(colorPriority).forEach(className => 
+            keyElement.classList.remove(className)
+        );
+        keyElement.classList.add(state);
+    }
+}
+
+  function saveGameState(isComplete = false, modalData = null) {
+    console.log("Saving game state...", { currentRow, currentSquareIndex, isComplete });
+    
+    // Tüm grid ve klavye state'ini tek seferde kaydet
     const allowedClasses = ["square", "flip", "correct", "misplaced", "incorrect"];
+    const colorClasses = ["correct", "misplaced", "incorrect"];
+    if (!rows) {
+      console.error("rows elements not found");
+      rows = document.querySelectorAll(".grid .row");
+      if (!rows || rows.length === 0) {
+        console.error("Could not find grid rows");
+        return;
+      }
+    }
+
+    // Grid verilerini kaydet
     const rowsData = Array.from(rows).map(row => {
       return Array.from(row.querySelectorAll(".square")).map(sq => {
+        // Sadece renk sınıflarını kaydet
+        const colorClass = colorClasses.find(cls => sq.classList.contains(cls));
         return {
-          letter: sq.textContent,
-          classes: Array.from(sq.classList).filter(cls => allowedClasses.includes(cls))
+          letter: sq.textContent || "",
+          classes: colorClass ? ["square", "flip", colorClass] : ["square"]
         };
       });
     });
-    // Klavye tuşlarının class'larını da kaydet
+
+    // Klavye verilerini kaydet
     const keyboardData = Array.from(document.querySelectorAll(".key")).map(btn => {
+      // Sadece renk sınıfını kaydet
+      const colorClass = colorClasses.find(cls => btn.classList.contains(cls));
+      const isWide = btn.classList.contains("wide");
       return {
         key: btn.textContent.trim(),
-        classes: Array.from(btn.classList)
+        classes: ["key", ...(isWide ? ["wide"] : []), ...(colorClass ? [colorClass] : [])]
       };
     });
+    
+    // Önceki state'i kontrol et
+    let previousState = null;
+    try {
+      previousState = JSON.parse(localStorage.getItem("wordleGameState"));
+    } catch (e) {
+      console.log("No previous state found");
+    }
+
+    // Modal verilerini oluştur
+    let modalState;
+    if (modalData) {
+      modalState = modalData;
+    } else if (previousState && previousState.modalState) {
+      modalState = previousState.modalState;
+    } else {
+      const modal = document.getElementById("completeModal");
+      modalState = {
+        title: modal.querySelector("h2").textContent,
+        word: modal.querySelector(".modal-word").textContent,
+        definitions: Array.from(modal.querySelectorAll(".definition-list li")).map(li => li.textContent),
+        attemptCount: modal.querySelector(".attempt-count").textContent,
+        isComplete: isComplete
+      };
+    }
+
     const gameState = {
       currentRow,
       currentSquareIndex,
       rowsData,
       keyboardData,
       isComplete,
-      puzzleId: new Date(),
-      updatedAt: new Date().toISOString()
+      modalState,
+      puzzleId: new Date().toDateString(),
+      updatedAt: new Date().toISOString(),
+      date: new Date().toDateString()
     };
-    localStorage.setItem("wordleGameState", JSON.stringify(gameState));
-  }
+
+    try {
+      localStorage.setItem("wordleGameState", JSON.stringify(gameState));
+      console.log("Game state saved successfully", gameState);
+    } catch (e) {
+      console.error("Error saving game state:", e);
+    }
+
+    // Her tahmin sonrası state'i kaydet
+    if (!isComplete) {
+      const currentGuess = getCurrentGuess();
+      if (currentGuess) {
+        usedGuesses.add(currentGuess);
+      }
+    }
+}
 
   function loadGameState() {
     const savedState = localStorage.getItem("wordleGameState");
     if (savedState) {
       const gameState = JSON.parse(savedState);
-      currentRow = gameState.currentRow;
-      currentSquareIndex = gameState.currentSquareIndex;
-      gameState.rowsData.forEach((rowCells, rowIndex) => {
-        rowCells.forEach((cell, cellIndex) => {
-          const square = rows[rowIndex].querySelectorAll(".square")[cellIndex];
-          square.textContent = cell.letter;
+      console.log("Loading game state:", gameState);
+      
+      // Sadece aynı gün için state'i yükle
+      const savedDate = new Date(gameState.updatedAt).toDateString();
+      const currentDate = new Date().toDateString();
+      
+      if (savedDate === currentDate) {
+        // Önce tüm grid ve klavyeyi temizle
+        document.querySelectorAll(".square").forEach(square => {
+          square.textContent = "";
           square.className = "square";
-          const cellClasses = cell.classes || [];
-          cellClasses.forEach(cls => {
-            if (cls !== "square") {
-              square.classList.add(cls);
+        });
+        document.querySelectorAll(".key").forEach(key => {
+          key.className = key.classList.contains("wide") ? "key wide" : "key";
+        });
+
+        currentRow = gameState.currentRow;
+        currentSquareIndex = gameState.currentSquareIndex;
+
+        // Clear and rebuild usedGuesses from existing rows
+      usedGuesses.clear();
+      gameState.rowsData.forEach((rowCells, rowIndex) => {
+        if (rowIndex < currentRow) {
+          let guess = "";
+          rowCells.forEach(cell => {
+            guess += cell.letter;
+          });
+          if (guess) {
+            usedGuesses.add(guess);
+          }
+        }
+      });
+
+      // Grid'i yükle ve renkleri uygula
+      gameState.rowsData.forEach((rowCells, rowIndex) => {
+        if (rowIndex <= gameState.currentRow) {  // Sadece doldurulmuş satırları yükle
+          rowCells.forEach((cell, cellIndex) => {
+            const square = rows[rowIndex].querySelectorAll(".square")[cellIndex];
+            if (!square) {
+              console.error("Square not found:", rowIndex, cellIndex);
+              return;
+            }
+            
+            // İçerik ve sınıfları ayarla
+            square.textContent = cell.letter;
+
+            // Renk sınıfını ayarla
+            const colorClass = cell.classes.find(cls => 
+              ["correct", "misplaced", "incorrect"].includes(cls)
+            );
+
+            // Renk sınıfı varsa hemen uygula (animasyonsuz)
+            if (colorClass) {
+              requestAnimationFrame(() => {
+                square.classList.add("flip");
+                square.classList.add(colorClass);
+              });
             }
           });
-        });
+        }
       });
-      // Klavye tuşlarının class'larını geri yükle
+      // Klavye durumunu geri yükle
       if (gameState.keyboardData) {
         gameState.keyboardData.forEach(keyObj => {
-          const btn = Array.from(document.querySelectorAll(".key")).find(b => b.textContent.trim() === keyObj.key);
+          const btn = Array.from(document.querySelectorAll('.key')).find(key => 
+            key.textContent.trim() === keyObj.key
+          );
           if (btn) {
-            btn.className = "key"; // önce sıfırla
-            keyObj.classes.forEach(cls => {
-              if (cls !== "key") btn.classList.add(cls);
-            });
+            // Özel renk sınıfını bul ve uygula
+            const colorClass = keyObj.classes.find(cls => ["correct", "misplaced", "incorrect"].includes(cls));
+            if (colorClass) {
+              btn.classList.add(colorClass);
+            }
+            // Wide sınıfını koru
+            if (keyObj.classes.includes("wide")) {
+              btn.classList.add("wide");
+            }
           }
         });
       }
@@ -319,25 +540,40 @@ document.addEventListener("DOMContentLoaded", function() {
           });
         });
       }
-      if (gameState.isComplete && gameState.currentRow < gameState.rowsData.length) {
+      // Son satırı renklendir (özellikle 6. denemede kelime doğru tahmin edildiğinde)
+      if (gameState.isComplete && gameState.currentRow <= gameState.rowsData.length - 1) {
         const lastRow = gameState.rowsData[gameState.currentRow];
         let allFilled = lastRow.every(cell => cell.letter && cell.letter !== "");
-        let allNotColored = lastRow.every(cell => !cell.classes.includes("correct") && !cell.classes.includes("misplaced") && !cell.classes.includes("incorrect"));
-        if (allFilled && allNotColored) {
-          // Tüm harfleri doğru bildiyse hepsini yeşil yap
+        
+        // Son satır dolu ve oyun tamamlanmışsa, tüm harfleri yeşil yap
+        if (allFilled) {
+          // Renklendirme class'larını kontrol et ve gerekirse uygula
           lastRow.forEach((cell, cellIndex) => {
             const square = rows[gameState.currentRow].querySelectorAll(".square")[cellIndex];
-            square.classList.add("flip");
-            square.classList.add("correct");
+            if (!square.classList.contains("correct") && 
+                !square.classList.contains("misplaced") && 
+                !square.classList.contains("incorrect")) {
+              square.classList.add("flip");
+              square.classList.add("correct");
+            }
           });
         }
       }
-      if (gameState.isComplete) {
-        showCompleteModal();
+      // Oyun durumunu kontrol et
+      if (gameState.isComplete && gameState.modalState) {
+        showCompleteModal({}, gameState.modalState);
         disableKeyboard();
       } else {
         enableKeyboard();
       }
+    } else {
+      // Farklı gün veya state yok, temizle
+      localStorage.removeItem("wordleGameState");
+      currentRow = 0;
+      currentSquareIndex = 0;
+      usedGuesses.clear();
+      enableKeyboard();
+    }
     }
   }
 
@@ -361,18 +597,21 @@ document.addEventListener("DOMContentLoaded", function() {
       });
       shareText += rowEmoji + "\n";
     }
-    shareText += "\nhttps://wordle-tanımalo-hekat.com/\n";
+    shareText += "\nhttps://wordle-tanımalı-hekat.com/\n";
     copyToClipboard(shareText);
     alert("Sonuç panoya kopyalandı!");
   });
 
   function copyToClipboard(text) {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => {
-        console.log("Kopyalandı!");
-      }).catch(err => {
-        console.error("Kopyalama hatası:", err);
-      });
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          console.log("Kopyalandı!");
+        })
+        .catch((err) => {
+          console.error("Kopyalama hatası:", err);
+        });
     } else {
       // Fallback for older browsers
       const textarea = document.createElement("textarea");
@@ -386,6 +625,47 @@ document.addEventListener("DOMContentLoaded", function() {
         alert("Kopyalama başarısız oldu.");
       }
       document.body.removeChild(textarea);
+    }
+  }
+
+  function createConfetti() {
+    // Wordle renk paleti
+    const colors = ["#538d4e", "#b59f3b", "#3a3a3c", "#d7dadc"];
+    const confettiCount = 150; // Konfeti sayısı
+
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement("div");
+      confetti.classList.add("confetti");
+
+      // Rastgele renk seç
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.backgroundColor = color;
+
+      // Rastgele başlangıç pozisyonu (ekranın üst kısmı)
+      const startX = Math.random() * window.innerWidth;
+      confetti.style.left = `${startX}px`;
+      confetti.style.top = "-10px";
+
+      // Rastgele boyut
+      const size = Math.random() * 8 + 4;
+      confetti.style.width = `${size}px`;
+      confetti.style.height = `${size}px`;
+
+      // Animasyon süresi ve gecikmesi
+      const duration = 3 + Math.random() * 5;
+      const delay = Math.random() * 2;
+      confetti.style.animation = `fall ${duration}s linear ${delay}s forwards`;
+
+      // Rastgele dönüş açısı
+      const rotation = Math.random() * 360;
+      confetti.style.transform = `rotate(${rotation}deg)`;
+
+      document.body.appendChild(confetti);
+
+      // Animasyon bittikten sonra konfetiyi sil
+      setTimeout(() => {
+        confetti.remove();
+      }, (duration + delay) * 1000);
     }
   }
 

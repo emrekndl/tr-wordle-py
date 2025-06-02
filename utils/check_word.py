@@ -2,13 +2,13 @@ import logging
 
 import numpy as np
 
-from utils.random_word import trUpper
+from utils.random_word import tr_lower
 
 logger = logging.getLogger(__name__)
 
 
 def check(guess: str, word: str) -> dict:
-    guess = trUpper(guess)
+    guess = tr_lower(guess)
 
     guess_arr = np.array(list(guess))
     word_arr = np.array(list(word))

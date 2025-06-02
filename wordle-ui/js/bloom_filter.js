@@ -2,7 +2,17 @@ class BloomFilter {
     constructor(size, numHashes, bitset) {
         this.size = size;
         this.numHashes = numHashes;
-        this.bitset = bitset || new Uint8Array((size + 7) >> 3);
+        // Calculate the number of bytes needed to store all bits
+        const numBytes = Math.ceil(size / 8);  // Same as (size + 7) >> 3
+        this.bitset = bitset || new Uint8Array(numBytes);
+        
+        // Validate bitset length if provided
+        if (bitset && bitset.length !== numBytes) {
+            console.error('Warning: Provided bitset length does not match expected size', {
+                provided: bitset.length,
+                expected: numBytes
+            });
+        }
     }
 
     // djb2 hash - simple, fast and well-distributed hash function
@@ -40,18 +50,24 @@ class BloomFilter {
 
     contains(value) {
         const indexes = this._getIndexes(value);
+        let foundCount = 0;
+        
         for (const index of indexes) {
             const byteIndex = index >> 3;
             const bitIndex = index & 7;
-            if (!(this.bitset[byteIndex] & (1 << bitIndex))) {
+            const bitValue = !!(this.bitset[byteIndex] & (1 << bitIndex));
+            
+            if (!bitValue) {
                 return false;
             }
+            foundCount++;
         }
+        
         return true;
     }
 
     // Load bloom filter data from JSON
-    static async loadFromJson(jsonPath = '/bloom_data.json') {
+    static async loadFromJson(jsonPath = '/wordle/bloom_data.json') {
         try {
             const response = await fetch(jsonPath);
             if (!response.ok) {
@@ -63,14 +79,20 @@ class BloomFilter {
             // Extract parameters from JSON
             const { size, nbHashes, bitset } = data;
             
-            // Convert base64/binary string data to Uint8Array
-            const binaryString = atob(bitset.data);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
+            // Convert base64 to Uint8Array in the browser
+            // First decode base64 to binary string
+            const binaryStr = atob(bitset.data);
+            
+            // Convert binary string to byte array
+            const bytes = new Uint8Array(binaryStr.length);
+            for (let i = 0; i < binaryStr.length; i++) {
+                bytes[i] = binaryStr.charCodeAt(i);
             }
+            
+            // Create new filter
+            const filter = new BloomFilter(size, nbHashes, bytes);
 
-            return new BloomFilter(size, nbHashes, bytes);
+            return filter;
         } catch (error) {
             console.error('Error loading bloom filter:', error);
             throw error;
@@ -79,7 +101,7 @@ class BloomFilter {
 
     // Load the pre-computed bloom filter data
     static async initialize() {
-        return await BloomFilter.loadFromJson('bloom_data.json');
+        return await BloomFilter.loadFromJson('/wordle/bloom_data.json');
     }
 
     static async createFromWordlist(csvPath) {
@@ -109,41 +131,6 @@ class BloomFilter {
         }
     }
 
-    // Add method to save filter data as JSON
-    // async savgToJson(filename = 'bloom_data.json') {
-    //     // Convert bitset to base64 string
-    //     const bytes = this.bitset;
-    //     let binary = '';
-    //     for (let i = 0; i < bytes.length; i++) {
-    //         binary += String.fromCharCode(bytes[i]);
-    //     }
-    //     const base64Data = btoa(binary);
-    //
-    //     const data = {
-    //         type: 'BloomFilter',
-    //         size: this.size,
-    //         nbHashes: this.numHashes,
-    //         bitset: {
-    //             type: 'Uint8Array',
-    //             data: base64Data
-    //         }
-    //     };
-    //
-    //     // Save to file using fetch POST
-    //     const response = await fetch('/api/save_bloom_filter', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify(data)
-    //     });
-    //
-    //     if (!response.ok) {
-    //         throw new Error(`Failed to save Bloom Filter: ${response.statusText}`);
-    //     }
-    //
-    //     return data;
-    // }
 }
 
 // Singleton instance for global access

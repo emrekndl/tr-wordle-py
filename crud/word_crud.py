@@ -10,8 +10,8 @@ from db.models import Game_Record
 logger = logging.getLogger(__name__)
 
 
-def get_game_by_token(db: Session, token: str):
-    """Get a game by token."""
+def get_gamerecord_or_create_gamerecord_with_token(db: Session, token: str):
+    """Get a game record or create game record wirh token."""
     game = db.execute(
         select(Game_Record).where(
             Game_Record.token == token and Game_Record.date == date.today()

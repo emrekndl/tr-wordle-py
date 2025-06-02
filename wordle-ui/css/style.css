@@ -49,7 +49,7 @@ body {
 .square {
   width: 50px;
   height: 50px;
-  border: 2px solid #3a3a3c;
+  border: 4px solid #3a3a3c;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -58,6 +58,83 @@ body {
   font-weight: bold;
   transition: transform 0.2s ease;
 }
+
+#shareButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #538d4e 0%, #b59f3b 100%);
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+#shareButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(83, 141, 78, 0.4);
+}
+
+#shareButton:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#shareButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+#shareButton:hover::before {
+  left: 100%;
+}
+
+.icon {
+  font-size: 13px;
+  transition: transform 0.3s ease;
+}
+
+#shareButton:hover .icon {
+  transform: scale(1.1);
+}
+
+/* Konfeti Efekti */
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  z-index: 1;
+  animation: fall linear forwards;
+  border-radius: 2px;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(105vh) rotate(360deg);
+  }
+}
+
 /* Pop animasyonu */
 .square.pop {
   animation: pop 0.2s ease;
@@ -96,15 +173,15 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  /* Eğer klavye alanı çok uzun olursa, kendi içinde kaydırmak için */
-  max-height: 200px;
-  overflow-y: auto;
+  margin-top: 2rem;
 }
+
 .keyboard-row {
   display: flex;
   justify-content: center;
   gap: 0.25rem;
 }
+
 .key {
   background-color: #818384;
   color: #ffffff;
@@ -116,10 +193,47 @@ body {
   font-weight: bold;
   flex: 1;
   max-width: 40px;
+  min-height: 45px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+/* PC ve geniş ekranlar için klavye boyutları */
+@media (min-width: 768px) {
+  .key {
+    max-width: 55px;
+    min-height: 60px;
+    font-size: 1.2rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .key.wide {
+    max-width: 95px !important;
+  }
+
+  .keyboard {
+    max-width: 850px;
+    margin: 2rem auto;
+  }
+
+  .keyboard-row {
+    gap: 0.4rem;
+  }
+}
+
+.key:hover {
+  transform: translateY(-2px) scale(1.05);
+  background-color: #9a9a9b;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
 .key:active {
-  opacity: 0.6;
+  transform: translateY(1px) scale(0.95);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
+
 .key.wide {
   flex: initial;
   max-width: 80px;
@@ -127,23 +241,49 @@ body {
 
 /* Renk sınıfları */
 .correct {
-  background-color: #6aaa64; /* Doğru harf, doğru konum */
-  border-color: #6aaa64;
-  color: #ffffff;
+  background-color: #6aaa64 !important; /* Doğru harf, doğru konum */
+  border-color: #6aaa64 !important;
+  color: #ffffff !important;
 }
 
 .misplaced {
-  background-color: #c9b458; /* Harf mevcut ama yanlış konumda */
-  border-color: #c9b458;
-  color: #ffffff;
+  background-color: #c9b458 !important; /* Harf mevcut ama yanlış konumda */
+  border-color: #c9b458 !important;
+  color: #ffffff !important;
 }
 
 .incorrect {
-  background-color: #3b3b3b; /* Kelimede bulunmayan harf */
-  border-color: #787c7e;
-  color: #ffffff;
+  background-color: #3b3b3b !important; /* Kelimede bulunmayan harf */
+  border-color: #787c7e !important;
+  color: #ffffff !important;
 }
-/* Çok basit bir modal stili örneği */
+
+/* Renk sınıfları için hover efektleri */
+.correct:hover {
+  background-color: #7bbb75 !important;
+}
+
+.misplaced:hover {
+  background-color: #dac569 !important;
+}
+
+.incorrect:hover {
+  background-color: #252525 !important;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.disabled:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: #818384 !important;
+}
+
+/* Modal Stilleri */
 .modal {
   display: none; /* başta gizli */
   position: fixed;
@@ -151,47 +291,163 @@ body {
   left: 0;
   top: 0;
   width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
 }
+
 .modal-content {
-  background-color: #3b3b3b;
+  background-color: #031219;
   color: #ffffff;
-  margin: 15% auto;
-  padding: 20px;
-  width: 300px;
-  border-radius: 8px;
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 25px;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
 }
-.modal-title {
-  font-size: 1.4em;
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  padding-right: 30px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: clamp(1.2em, 4vw, 1.6em);
+}
+
+.attempt-count {
+  font-size: clamp(1em, 3.5vw, 1.3em);
   font-weight: bold;
-  margin-bottom: 8px;
-  color: #333;
+  padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .modal-word {
-  font-size: 1.6em;
+  font-size: clamp(1.4em, 5vw, 2em);
   font-weight: bold;
-  color: #1d8a23;
-  margin-bottom: 12px;
+  color: #6aaa64;
+  margin: 15px 0;
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: rgba(106, 170, 100, 0.1);
 }
 
 .definition-list {
   list-style-type: "• ";
   padding-left: 1.2em;
   color: #cccccc;
+  font-size: clamp(0.9em, 3.5vw, 1.1em);
+  line-height: 1.5;
 }
 
 .definition-list li {
-  margin-bottom: 6px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
 }
+
 .close {
   position: absolute;
   top: 10px;
   right: 10px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 1.5em;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.title-container {
+  text-align: center;
+  max-width: 800px;
+  width: 100%;
+}
+
+.title {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.word {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.letter {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: white;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.letter:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Wordle renkleri */
+.color-1 {
+  background-color: #6aaa64;
+} /* Yeşil */
+.color-2 {
+  background-color: #c9b458;
+} /* Sarı */
+.color-3 {
+  background-color: #f5793a;
+} /* Turuncu */
+.color-4 {
+  background-color: #85c0f9;
+} /* Mavi */
+
+@media (max-width: 768px) {
+  .letter {
+    width: 35px;
+    height: 35px;
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .letter {
+    width: 25px;
+    height: 25px;
+    font-size: 1.7rem;
+  }
 }
 
 /* Responsive düzenlemeler */
@@ -207,31 +463,65 @@ body {
     height: 40px;
     font-size: 1.2rem;
   }
+  .keyboard {
+    margin-top: 1.5rem;
+  }
   .key {
-    padding: 0.5rem 0.75rem;
-    max-width: 35px;
-    font-size: 0.9rem;
+    height: 55px;
+    max-width: 45px;
+    font-size: 1.1rem;
+    padding: 0.5rem;
   }
   .key.wide {
-    max-width: 70px;
+    max-width: 75px;
+  }
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+    margin: 0;
   }
 }
 
 @media (max-width: 400px) {
+  .container {
+    padding-bottom: 220px;
+  }
   .title {
     font-size: 1.5rem;
+  }
+  .keyboard {
+    padding: 8px 4px;
+    gap: 4px;
+  }
+  .key {
+    height: clamp(40px, 9vw, 50px);
+  }
+}
+
+/* Yatay mod için özel düzenleme */
+@media (max-height: 600px) and (orientation: landscape) {
+  .container {
+    padding-bottom: 180px;
+  }
+  .keyboard {
+    padding: 5px;
+  }
+  .key {
+    height: 35px;
+    min-width: 35px;
+    padding: 0.3rem;
+    font-size: 0.9rem;
   }
   .square {
     width: 35px;
     height: 35px;
     font-size: 1rem;
+    border-width: 3px;
   }
-  .key {
-    padding: 0.4rem 0.6rem;
-    max-width: 30px;
-    font-size: 0.8rem;
+  .grid {
+    gap: 0.3rem;
   }
-  .key.wide {
-    max-width: 60px;
+  .row {
+    gap: 0.3rem;
   }
 }

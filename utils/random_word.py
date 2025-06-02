@@ -5,21 +5,22 @@ from datetime import datetime
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+WORD_LIST_PATH = "data/wordlist.txt"
 
-def trUpper(word):
+def tr_lower(word):
     """Turkish uppercase letters
     Example:
-    >>> trUpper("i")
+    >>> tr_lower("İ")
     "İ"
     """
     letters_list = {
-        "i": "İ",
-        "ı": "I",
-        "ö": "Ö",
-        "ü": "Ü",
-        "ç": "Ç",
-        "ş": "Ş",
-        "ğ": "Ğ",
+        "İ": "i",
+        "I": "ı",
+        "Ö": "ö",
+        "Ü": "ü",
+        "Ç": "ç",
+        "Ş": "ş",
+        "Ğ": "ğ",
     }
     for letter in word:
         if letter in letters_list:
@@ -48,7 +49,7 @@ def get_daily_word(wordlist):
         delta_days = (now - epoch).days
         index = delta_days % len(words)
 
-        return trUpper(words[index]).upper()
+        return tr_lower(words[index]).lower()
 
     else:
         logger.error("No words of length 5 in the word list")
@@ -56,7 +57,7 @@ def get_daily_word(wordlist):
 
 
 def get_wordlist():
-    wordlistpath = pathlib.Path(__file__).parent.parent / "data/wordlist.csv"
+    wordlistpath = pathlib.Path(__file__).parent.parent / WORD_LIST_PATH
 
     wordlist = wordlistpath.read_text(encoding="utf-8").splitlines()
 
