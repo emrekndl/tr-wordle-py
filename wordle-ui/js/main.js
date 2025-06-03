@@ -14,13 +14,18 @@ import {
 import { saveGameState, loadGameState } from "./game-state.js";
 
 // Global state
-let currentRow = 0;
-let currentSquareIndex = 0;
-const maxRows = 6;
-const maxSquares = 5;
-const usedGuesses = new Set();
-let rows;
+let currentRow = 0;          // Aktif satır
+let currentSquareIndex = 0;  // Aktif satırdaki kare pozisyonu
+const maxRows = 6;           // Maksimum tahmin hakkı
+const maxSquares = 5;        // Kelime uzunluğu
+const usedGuesses = new Set(); // Daha önce denenmiş tahminler
+let rows;                    // Oyun ızgarasındaki tüm satırlar
 
+/**
+ * Türkçe karakterler için lowercase dönüşümü yapar
+ * @param {string} str Dönüştürülecek string
+ * @returns {string} Küçük harfe dönüştürülmüş string
+ */
 function toLocaleLowerCase(str) {
     return str.toLocaleLowerCase("tr-TR");
 }
@@ -58,6 +63,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     });
 
+    /**
+     * Enter tuşuna basıldığında çalışır
+     * Tahmin kelimesini kontrol eder ve sonucu gösterir
+     */
     async function handleEnterKey() {
         if (currentSquareIndex === maxSquares) {
             const guess = Array.from(rows[currentRow].querySelectorAll(".square"))
@@ -95,6 +104,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
+    /**
+     * Backspace tuşuna basıldığında çalışır
+     * Son harfi siler
+     */
     function handleBackspaceKey() {
         if (currentSquareIndex > 0) {
             currentSquareIndex--;
@@ -103,6 +116,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
+    /**
+     * Harf tuşlarına basıldığında çalışır
+     * Aktif kareye harfi ekler
+     * @param {string} key Basılan tuş
+     */
     function handleLetterKey(key) {
         if (currentSquareIndex < maxSquares) {
             const currentSquare = rows[currentRow].querySelectorAll(".square")[currentSquareIndex];
@@ -113,6 +131,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
+    /**
+     * Aktif satırı temizler
+     * Tüm karelerdeki harfleri ve renkleri sıfırlar
+     */
     function clearCurrentRow() {
         const squares = rows[currentRow].querySelectorAll(".square");
         squares.forEach((square) => {
@@ -122,6 +144,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         currentSquareIndex = 0;
     }
 
+    /**
+     * Geçersiz kelime girildiğinde rastgele bir uyarı mesajı gösterir
+     */
     function handleInvalidWord() {
         const invalidMessages = [
             "Hmm... Bu kelimeyi tanımıyoruz ama kulağa hoş geliyor! 😄",
@@ -138,6 +163,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         toastWarning(randomMessage);
     }
 
+    /**
+     * Eksik kelime girildiğinde rastgele bir uyarı mesajı gösterir
+     */
     function handleIncompleteWord() {
         const incompleteMessages = [
             "Kelimeyi yarım bırakmışsın gibi! 🤔",
@@ -156,6 +184,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         toastWarning(randomMessage);
     }
 
+    /**
+     * API'den gelen tahmin sonucunu işler
+     * Animasyonları gösterir ve oyun durumunu günceller
+     * @param {Object} response API yanıtı
+     * @param {Function} toLocaleLowerCaseFn Türkçe lowercase dönüşüm fonksiyonu
+     */
     function handleGuessResponse(response, toLocaleLowerCaseFn) {
         let isCorrectGuess = false;
         if (response.correct_letters) {

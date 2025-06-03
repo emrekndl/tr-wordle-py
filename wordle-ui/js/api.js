@@ -1,6 +1,12 @@
 // API Base URL
 const API_BASE = `${window.location.origin}/api/wordle`;
 
+/**
+ * Kullanıcının tahminini API'ye gönderir ve sonucu alır
+ * @param {string} guessWord Tahmin edilen kelime
+ * @param {Function} toLocaleLowerCase Türkçe karakterler için lowercase dönüşümü yapan fonksiyon
+ * @returns {Promise<Object|null>} API yanıtı veya hata durumunda null
+ */
 export async function checkGuess(guessWord, toLocaleLowerCase) {
     try {
         const response = await fetch(`${API_BASE}/check`, {
@@ -21,7 +27,11 @@ export async function checkGuess(guessWord, toLocaleLowerCase) {
     }
 }
 
-export function fetchWordOfTheDay() {
+/**
+ * Günün kelimesini arka planda oluşturulur.
+ * @returns {Promise<void>}
+ */
+export async function fetchWordOfTheDay() {
     return fetch(`${API_BASE}/wordoftheday`, {
         method: "GET",
         credentials: "include",

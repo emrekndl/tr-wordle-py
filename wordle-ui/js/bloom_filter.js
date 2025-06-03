@@ -1,4 +1,14 @@
+/**
+ * Kelime kontrolü için Bloom Filter veri yapısını implement eden sınıf
+ * Az bellek kullanarak hızlı kelime arama sağlar
+ */
 class BloomFilter {
+    /**
+     * Bloom Filter'ı oluşturur
+     * @param {number} size Filtre boyutu (bit sayısı)
+     * @param {number} numHashes Hash fonksiyonu sayısı
+     * @param {Uint8Array} bitset Önceden oluşturulmuş bit dizisi (opsiyonel)
+     */
     constructor(size, numHashes, bitset) {
         this.size = size;
         this.numHashes = numHashes;
@@ -15,7 +25,12 @@ class BloomFilter {
         }
     }
 
-    // djb2 hash - simple, fast and well-distributed hash function
+    /**
+     * djb2 hash algoritması kullanarak string için hash değeri üretir
+     * @param {string} str Hash'lenecek string
+     * @returns {number} Hash değeri
+     * @private
+     */
     _djb2Hash(str) {
         let hash = 5381;
         for (let i = 0; i < str.length; i++) {
@@ -39,6 +54,10 @@ class BloomFilter {
         return indexes;
     }
 
+    /**
+     * Bloom Filter'a yeni bir eleman ekler
+     * @param {string} str Eklenecek string
+     */
     add(value) {
         const indexes = this._getIndexes(value);
         for (const index of indexes) {
@@ -48,6 +67,11 @@ class BloomFilter {
         }
     }
 
+    /**
+     * Verilen string'in Bloom Filter'da olup olmadığını kontrol eder
+     * @param {string} str Kontrol edilecek string
+     * @returns {boolean} String filter'da varsa true, yoksa false
+     */
     contains(value) {
         const indexes = this._getIndexes(value);
         let foundCount = 0;
@@ -99,7 +123,11 @@ class BloomFilter {
         }
     }
 
-    // Load the pre-computed bloom filter data
+    /**
+     * JSON dosyasından Bloom Filter'ı yükler ve başlatır
+     * @returns {Promise<BloomFilter>} Oluşturulan Bloom Filter nesnesi
+     * @static
+     */
     static async initialize() {
         return await BloomFilter.loadFromJson('/wordle/bloom_data.json');
     }

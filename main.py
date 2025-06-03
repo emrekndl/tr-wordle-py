@@ -49,7 +49,6 @@ def get_app(lifespan=lifespan):
         #     "http://127.0.0.1:8000",
         #     "http://0.0.0.0:8000",
         # ],
-        # allow_credentials=False,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

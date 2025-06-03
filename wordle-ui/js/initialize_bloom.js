@@ -3,6 +3,12 @@ import BloomFilter from './bloom_filter.js';
 // Bloom Filter initialize işlemi
 let bloomFilter = null;
 
+/**
+ * Bloom Filter'ı yükler ve başlatır
+ * Kelime kontrolü için gerekli veri yapısını oluşturur
+ * @returns {Promise<BloomFilter>} Yüklenen Bloom Filter nesnesi
+ * @throws {Error} Yükleme başarısız olursa hata fırlatır
+ */
 async function initializeBloomFilter() {
     console.log("Bloom Filter yükleniyor...");
     try {
@@ -16,7 +22,11 @@ async function initializeBloomFilter() {
     }
 }
 
-// Bloom Filter'dan kelime kontrolü
+/**
+ * Verilen kelimenin geçerli bir kelime olup olmadığını Bloom Filter ile kontrol eder
+ * @param {string} word Kontrol edilecek kelime
+ * @returns {Promise<boolean>} Kelime geçerli ise true, değilse veya hata olursa false
+ */
 async function checkWordInBloomFilter(word) {
     try {
         if (!bloomFilter) {

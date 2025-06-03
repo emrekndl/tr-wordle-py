@@ -1,3 +1,29 @@
+// Global toast avatar
+let toastAvatar = null;
+
+/**
+ * Toast mesajları için kullanılacak avatar resmini yükler ve saklar
+ * @returns {Promise<string>} Avatar resmi URL'i
+ */
+function loadToastAvatar() {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            toastAvatar = img.src;
+            resolve(img.src);
+        };
+        img.onerror = reject;
+        img.src = "img/4534727.png";
+    });
+}
+
+// İlk yüklemede avatarı hazırla
+loadToastAvatar().catch(console.error);
+
+/**
+ * Ekranın sağ üst köşesinde bir uyarı toast mesajı gösterir
+ * @param {string} message Gösterilecek mesaj
+ */
 export function toastWarning(message) {
     Toastify({
         text: `${message}`,
@@ -14,10 +40,15 @@ export function toastWarning(message) {
         style: {
             background: "linear-gradient(to right, #00b09b,rgb(221, 184, 20))",
         },
-        avatar: "img/4534727.png",
+        avatar: toastAvatar,
     }).showToast();
 }
 
+/**
+ * Oyun sonunda kazanma/kaybetme modalını gösterir
+ * @param {Object} response API'den gelen kelime ve tanım bilgileri
+ * @param {Object} savedModalState Kaydedilmiş modal durumu (opsiyonel)
+ */
 export function showCompleteModal(response = {}, savedModalState = null) {
     const modal = document.getElementById("completeModal");
     modal.style.display = "block";
@@ -131,6 +162,10 @@ export function showCompleteModal(response = {}, savedModalState = null) {
     }
 }
 
+/**
+ * Metni panoya kopyalar
+ * @param {string} text Kopyalanacak metin
+ */
 export function copyToClipboard(text) {
     if (navigator.clipboard) {
         navigator.clipboard.writeText(text)
@@ -152,6 +187,9 @@ export function copyToClipboard(text) {
     }
 }
 
+/**
+ * Modalı kapatır
+ */
 export function closeModal() {
     document.getElementById("completeModal").style.display = "none";
 }

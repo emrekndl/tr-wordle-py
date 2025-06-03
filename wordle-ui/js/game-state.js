@@ -1,3 +1,12 @@
+/**
+ * Oyun durumunu localStorage'a kaydeder
+ * @param {number} currentRow Aktif satır numarası
+ * @param {number} currentSquareIndex Aktif karedeki index
+ * @param {NodeList} rows Tüm satırlar
+ * @param {Set} usedGuesses Kullanılmış tahminler
+ * @param {boolean} isComplete Oyun bitti mi?
+ * @param {Object} modalData Modal içeriği (opsiyonel)
+ */
 export function saveGameState(currentRow, currentSquareIndex, rows, usedGuesses, isComplete = false, modalData = null) {
     const allowedClasses = ["square", "flip", "correct", "misplaced", "incorrect"];
     const colorClasses = ["correct", "misplaced", "incorrect"];
@@ -90,6 +99,15 @@ export function saveGameState(currentRow, currentSquareIndex, rows, usedGuesses,
     return gameState;
 }
 
+/**
+ * localStorage'dan oyun durumunu yükler
+ * @param {NodeList} rows Tüm satırlar
+ * @param {Set} usedGuesses Kullanılmış tahminler
+ * @param {Object} options Yükleme seçenekleri
+ * @param {Function} options.onGameComplete Oyun bittiğinde çağrılacak fonksiyon
+ * @param {Function} options.enableKeyboard Klavyeyi aktif etme fonksiyonu
+ * @returns {Object|null} Kaydedilmiş oyun durumu
+ */
 export function loadGameState(rows, usedGuesses, {onGameComplete, enableKeyboard}) {
     const savedState = localStorage.getItem("wordleGameState");
     if (!savedState) return null;

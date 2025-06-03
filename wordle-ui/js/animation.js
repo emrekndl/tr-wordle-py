@@ -1,3 +1,7 @@
+/**
+ * Kazanma durumunda konfeti efekti oluşturur
+ * Rastgele renkli ve boyutlu konfetiler ekranın üstünden aşağı doğru düşer
+ */
 export function createConfetti() {
     const colors = ["#538d4e", "#b59f3b", "#3a3a3c", "#d7dadc"];
     const confettiCount = 150;
@@ -32,6 +36,13 @@ export function createConfetti() {
     }
 }
 
+/**
+ * Bir satırdaki kareleri sırayla çevirir ve doğru/yanlış/yanlış yerde renklerini gösterir
+ * @param {HTMLElement} row Animasyon yapılacak satır elementi
+ * @param {Object} result API'den gelen tahmin sonucu
+ * @param {Function} callback Her harf için çağrılacak callback fonksiyonu
+ * @param {Function} toLocaleLowerCase Türkçe karakterler için lowercase dönüşümü yapan fonksiyon
+ */
 export function animateRow(row, result, callback, toLocaleLowerCase) {
     const squares = row.querySelectorAll(".square");
 
