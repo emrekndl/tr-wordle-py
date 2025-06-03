@@ -1,35 +1,36 @@
-# Tanımalı Hekat (Wordle)
+# Hekat (Wordle)
 
-A Turkish implementation of the popular word game Wordle with word definitions from TDK (Turkish Language Association). Built with FastAPI backend and modern JavaScript frontend.
+TDK (Türk Dil Kurumu) sözlük tanımlarıyla birlikte geliştirilen Türkçe Wordle oyunu. FastAPI backend ve modern JavaScript frontend ile oluşturulmuştur.
+[Readme-EN](EN-README.md)
 
-## Overview
+## Genel Bakış
 
-Tanımalı Hekat is a Turkish word guessing game where players get 6 attempts to guess a 5-letter word. After each guess, the game provides feedback:
+Hekat, oyuncuların 5 harfli bir kelimeyi 6 denemede bulmaya çalıştığı bir Türkçe kelime tahmin oyunudur. Her tahminden sonra oyun şu şekilde geri bildirim verir:
 
-- 🟩 Green: Letter is correct and in the right position
-- 🟨 Yellow: Letter exists in the word but in wrong position
-- ⬛ Gray: Letter does not exist in the word
+- 🟩 Yeşil: Harf doğru ve doğru konumda
+- 🟨 Sarı: Harf kelimede var ama yanlış konumda
+- ⬛ Gri: Harf kelimede yok
 
-What makes this implementation special:
-- Word definitions from TDK are shown after completing the game
-- Mobile-friendly responsive design
-- Local storage to save game progress
-- Share results
+Bu uygulamayı özel kılan özellikler:
+- Oyun sonunda TDK'dan alınan kelime tanımları gösterilir
+- Mobil cihazlara uyumlu tasarım
+- Oyun ilerlemesini kaydetme özelliği
+- Sonuçları paylaşabilme
 
-## Features
+## Özellikler
 
-- 🎲 Daily word challenges
-- 📚 Turkish word validation using Bloom Filter
-- 🔍 Word definitions from TDK
-- 💾 Game state persistence
-- 📱 Responsive design
-- 🔄 Word of the day caching
+- 🎲 Günlük kelime görevi
+- 📚 Bloom Filter kullanarak Türkçe kelime doğrulama
+- 🔍 TDK kelime tanımları
+- 💾 Oyun durumu kaydı
+- 📱 Duyarlı tasarım
+- 🔄 Günün kelimesi önbellekleme
 
-## Technology Stack
+## Teknoloji Altyapısı
 
 ### Backend
 - FastAPI
-- APScheduler (for daily word resets)
+- APScheduler (günlük kelime yenileme için)
 - SQLite
 - Python 3.11+
 
@@ -37,99 +38,110 @@ What makes this implementation special:
 - Vanilla JavaScript (ES6+)
 - Modern CSS3
 - HTML5
-- Bloom Filter for word validation
-- Local Storage for game state
+- Bloom Filter kelime doğrulama
+- Local Storage oyun durumu kaydı
 
-### Special Features
-- **Bloom Filter**: Efficient word validation with low memory footprint
-- **WebAssembly Trie**: Fast prefix tree implementation for word lookups (in development)
+### Özel Özellikler
+- **Bloom Filter**: Düşük bellek kullanımı ile etkili kelime doğrulama
+- **WebAssembly Trie**: Hızlı kelime arama için prefix ağacı uygulaması (geliştirme aşamasında)
 
-## Installation
+## Kurulum
 
-1. Clone the repository:
+1. Depoyu klonlayın:
 ```bash
-git clone [repository-url]
-cd wordle-py
+git clone https://github.com/emrekndl/tr-wordle-py.git
+cd tr-wordle-py
 ```
 
-2. Install uv (if not already installed [uv](https://docs.astral.sh/uv/)):
+2. uv paket yöneticisini yükleyin (kurulu değilse [uv](https://docs.astral.sh/uv/)):
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-3. Install dependencies using uv:
+3. Bağımlılıkları uv ile yükleyin:
 ```bash
 uv sync
 ```
 
-4. Create a virtual environment and activate it:
+4. Sanal ortamı aktifleştirin:
 ```bash
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+source .venv/bin/activate  # Windows için: .venv\Scripts\activate
 ```
 
-5. Run the application:
+5. CORS ayarlarını yapılandırın:
+main.py dosyasında CORS middleware ayarlarını düzenleyin:
+```python
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8000", "http://127.0.0.1:8000"],  # İzin verilen originler
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+6. Uygulamayı çalıştırın:
 ```bash
 python main.py
 ```
 
-The application will be available at `http://localhost:8000/wordle/`
+Uygulama `http://localhost:8000/wordle/` adresinde çalışmaya başlayacaktır.
 
-Note: uv is a new, extremely fast Python package installer and resolver. It's written in Rust and designed to be a drop-in replacement for pip, providing much faster dependency resolution and installation.
+Not: uv, pip'in yerine geçebilen, Rust ile yazılmış çok hızlı bir Python paket yükleyici ve çözümleyicisidir. Bağımlılık çözümleme ve kurulum işlemlerini çok daha hızlı gerçekleştirir.
 
-## Project Structure
+## Proje Yapısı
 
 ```
 tr-wordle-py/
-├── crud/               # Database CRUD operations 
-├── data/              # Word lists and game data
-├── db/                # Database models and configuration
-├── ext/               # External tools (Bloom Filter, WebAssembly)
-├── routers/           # FastAPI route handlers
-├── tasks/            # Background tasks
-├── utils/            # Utility functions
-└── wordle-ui/        # Frontend application
-    ├── css/          # Stylesheets
-    ├── js/           # JavaScript modules
-    └── img/          # Images and assets
+├── crud/               # Veritabanı CRUD işlemleri
+├── data/              # Kelime listeleri ve oyun verileri
+├── db/                # Veritabanı modelleri ve yapılandırması
+├── ext/               # Harici araçlar (Bloom Filter, WebAssembly)
+├── routers/           # FastAPI yönlendiricileri
+├── tasks/             # Arka plan görevleri
+├── utils/             # Yardımcı fonksiyonlar
+└── wordle-ui/         # Frontend uygulaması
+    ├── css/           # Stil dosyaları
+    ├── js/            # JavaScript modülleri
+    └── img/           # Görseller
 ```
 
 
 ### Demo
 <div style="display: flex; justify-content: center;">
-    <img src="images/tr-wordle-py.mp4" alt="Game View" width="500"/>
+    <img src="images/demo.gif" alt="Oyun Görünümü" width="500"/>
 </div>
 
-### Mobile View
+### Mobil Görünüm
 <div style="display: flex; justify-content: center; gap: 20px;">
-    <img src="images/mobile-view.png" alt="Mobile View" width="250"/>
-    <img src="images/mobile-view2.png" alt="Mobile View" width="250"/>
+    <img src="images/mobile-view.png" alt="Mobil Görünüm" width="250"/>
+    <img src="images/mobile-view2.png" alt="Mobil Görünüm" width="250"/>
 </div>
 
-## Technical Details
+## Teknik Detaylar
 
-### Bloom Filter Implementation
+### Bloom Filter Uygulaması
 
-We use a Bloom Filter for efficient word validation with the following characteristics:
-- Size: 81,708 bits
-- Hash Functions: 10
-- False Positive Rate: <1%
+Kelime doğrulama için aşağıdaki özelliklere sahip bir Bloom Filter kullanıyoruz:
+- Boyut: 81,708 bit
+- Hash Fonksiyonları: 10
+- Yanlış Pozitif Oranı: <%1
 
-The Bloom Filter is implemented in both JavaScript (for client-side validation) and Go (for generating the filter data), providing quick word validation while maintaining a small memory footprint.
+Bloom Filter, hem JavaScript (istemci tarafı doğrulama) hem de Go (filtre verisi oluşturma) ile uygulanmıştır ve düşük bellek kullanımı ile hızlı kelime doğrulama sağlar.
 
-### Caching Strategy
+### Önbellekleme Stratejisi
 
-The application uses multiple caching levels:
-- Browser-side game state caching using LocalStorage
-- Server-side word of the day caching using `@lru_cache`
-- TDK word definition caching for improved performance
+Uygulama birden fazla önbellekleme seviyesi kullanır:
+- Local Storage ile tarayıcı tarafında oyun durumu önbellekleme
+- `@lru_cache` ile sunucu tarafında günün kelimesi önbellekleme
+- Performans için TDK kelime tanımları önbellekleme
 
-### Daily Word Selection
-- Words are randomly selected from a curated list of 5-letter Turkish words
-- The word of the day is synchronized for all users
-- APScheduler ensures word rotation at midnight (Europe/Istanbul timezone)
+### Günlük Kelime Seçimi
+- Kelimeler, özel olarak seçilmiş 5 harfli Türkçe kelimeler listesinden rastgele seçilir
+- Günün kelimesi tüm kullanıcılar için senkronize edilir
+- APScheduler ile gece yarısında (Europe/Istanbul saat dilimi) kelime yenilenir
 
 
-## License
+## Lisans
 
-MIT License. See the [LICENSE](LICENSE) file for details.
-
+MIT Lisansı. Detaylar için [LICENSE](LICENSE) dosyasına bakınız.
