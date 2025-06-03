@@ -99,14 +99,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 
             // Animasyonları başlat
             animateRow(currentRow, response, function () {
-              // Animasyonlar bittikten sonra state'i kaydet
-              setTimeout(() => {
-                saveGameState(false);
-              }, 1500);
-              // Animasyon tamamlandıktan sonra state'i kaydet
-              setTimeout(() => {
-                saveGameState(false);
-              }, 500);
 
               // Doğru tahmin kontrolü
               let isCorrectGuess = false;
@@ -121,10 +113,12 @@ document.addEventListener("DOMContentLoaded", async function () {
               if (!isCorrectGuess && !isLastRow) {
                 currentRow++;
                 currentSquareIndex = 0;
+                // Normal tahmin - state'i kaydet
+                saveGameState(false);
               } else {
-                // Modal data hazırla
+                // Oyun bitti (ya doğru tahmin ya da son satır)
                 const modalData = {
-                  title: isCorrectGuess ? "Tebrikler 🎉" : "Oyun Bitti!",
+                  title: isCorrectGuess ? "Tebrikler 🎉" : "Oyun Bitti",
                   word: Object.keys(response.word_definition || response)[0],
                   definitions: response.word_definition
                     ? response.word_definition[
@@ -138,7 +132,9 @@ document.addEventListener("DOMContentLoaded", async function () {
                 // State'i kaydet ve modalı göster
                 saveGameState(true, modalData);
                 setTimeout(() => showCompleteModal(response), 2000);
-                createConfetti();
+                if (isCorrectGuess) {
+                  createConfetti();
+                }
                 disableKeyboard();
               }
             });
@@ -213,7 +209,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (isCorrectGuess) {
         modalTitle.textContent = " Tebrikler 🎉";
       } else {
-        modalTitle.textContent = "Oyun Bitti!";
+        modalTitle.textContent = "Oyun Bitti";
       }
 
       // Kelime ve tanım bilgisi iki farklı formatta gelebilir

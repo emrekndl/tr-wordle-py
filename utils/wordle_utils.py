@@ -48,5 +48,6 @@ def check_guessed_word(guessed_word: str, db: Session, game: Game_Record):
         logger.debug(f"word_definition: {res.word_definition}")
     if not res.is_complete and game[0].guess_count == 6:
         res.word_definition = set_word_definition_to_cache(word)
+        res.is_complete = True
     logger.debug(f"Guesss_Response: {res}")
     return res
