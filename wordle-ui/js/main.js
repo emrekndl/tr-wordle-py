@@ -81,7 +81,19 @@ document.addEventListener("DOMContentLoaded", async function () {
           try {
             const isValidWord = await checkWordInBloomFilter(lowercaseGuess);
             if (!isValidWord) {
-              toastWarning("Kelime listesinde yok!");
+              const invalidMessages = [
+                "Hmm... Bu kelimeyi tanımıyoruz ama kulağa hoş geliyor! 😄",
+                "Bu kelime listemize girmemiş. Başka bir kelimeyle şansını dene!",
+                "Kelimeni bulamadık ama belki bir dahaki güncellemede ekleriz 😉",
+                "Sözlüğümüzde yokmuş bu. Yeni bir kelime denemeye ne dersin?",
+                "Yaratıcılığına sağlık, ama bu kelime kabul edilmiyor 😅",
+                "Bu kelime galiba uzaydan geldi 🚀 Bizim listede yok!",
+                "Sözlük şöyle bir baktı ama 'hmm, bu neydi?' dedi 😄",
+                "Sözlük bu kelimeyi görmemiş bile! Tekrar dene! 📚",
+                "Kelime listesinde yok!",
+              ];
+              const randomIndex = Math.floor(Math.random() * invalidMessages.length);
+              toastWarning(invalidMessages[randomIndex]);
               return;
             }
           } catch (error) {
@@ -140,9 +152,21 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
           });
         } else {
-          toastWarning("Birkaç harf eksik gibi sanki!");
-          // toastWarning("Kelime başlamış ama bitmemiş gibi!");
-          // toastWarning("Eksik harf girdiniz!");
+          const incompleteMessages = [
+            "Kelimeyi yarım bırakmışsın gibi! 🤔",
+            "Biraz daha harf eklemeye ne dersin? ✍️",
+            "Kelime tam değil sanki! Devam et... 🎯",
+            "Harf harf gidiyoruz, biraz daha var! 🚶",
+            "Az kaldı, birkaç harf daha ekle! 🎲",
+            "Kelime biraz kısa kalmış gibi! 📏",
+            "Hmmm... Sanki eksik bir şeyler var! 🤓",
+            "Biraz daha düşün, kelime tam değil! 🧩",
+            "Acele yok, kelimeyi tamamla! ⏳",
+            "Kelimenin devamı gelecek mi? 🎭",
+            "Birkaç harf eksik gibi sanki! 🧐",
+          ];
+          const randomIndex = Math.floor(Math.random() * incompleteMessages.length);
+          toastWarning(incompleteMessages[randomIndex]);
         }
       } else if (key === "⌫") {
         if (currentSquareIndex > 0) {
@@ -207,9 +231,53 @@ document.addEventListener("DOMContentLoaded", async function () {
       attemptCount.style.color = isCorrectGuess ? "#6aaa64" : "#dc3545";
 
       if (isCorrectGuess) {
-        modalTitle.textContent = " Tebrikler 🎉";
+        // Her seviye için birden fazla mesaj
+        // O seviye için rastgele bir mesaj seç
+        const levelMessages = {
+          1: [
+            "🎯 Vay be! İlk denemede...",
+            "🧠 Bu nasıl bir sezgi böyle?",
+            "🔮 Resmen telepati bu!"
+          ],
+          2: [
+            "⚡️ Beyin fırtınası yaptın resmen!",
+            "💫 2'de buldun, müthiş gidiyor!",
+            "🚀 Hem hızlı hem doğru!"
+          ],
+          3: [
+            "👁️ Üçüncü göz devrede!",
+            "💪 Ortalama üstü performans...",
+            "🎯 3 olsun bizim olsun!"
+          ],
+          4: [
+            "🌅 Yavaş yavaş açılıyorsun!",
+            "🧘 Stres yapmadan, sakin sakin...",
+            "💫 İyi gidiyorsun böyle devam!"
+          ],
+          5: [
+            "🏃 Son vagondan atlayan şampiyon!",
+            "🚂 Az kalsın kaçırıyordun treni!",
+            "😅 Stresli ama tatlı bir galibiyet!"
+          ],
+          6: [
+            "😰 Şansa bak be, az kalsın!",
+            "🎲 Son şans kuponu tuttu!",
+            "🎭 Foto finişle kazandın!"
+          ]
+        };
+        const messages = levelMessages[currentRow + 1];
+        const randomIndex = Math.floor(Math.random() * messages.length);
+        modalTitle.textContent = "Tebrikler  🎉 " + messages[randomIndex];
       } else {
-        modalTitle.textContent = "Oyun Bitti";
+        // Bilememe durumu için farklı mesajlar
+        const failMessages = [
+          "💪 E hadi be! Yarın mutlaka...",
+          "🌅 Olmadı bu sefer, dert etme!",
+          "🔄 Sen yarın bir daha gel...",
+          "🎯 Çok yaklaştın aslında!"
+        ];
+        const randomIndex = Math.floor(Math.random() * failMessages.length);
+        modalTitle.textContent = "Oyun Bitti " + failMessages[randomIndex];
       }
 
       // Kelime ve tanım bilgisi iki farklı formatta gelebilir
