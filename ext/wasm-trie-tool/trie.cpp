@@ -1,127 +1,137 @@
 #include "trie.h"
-// #include <cstddef>
+#define UTF8_ACCEPT 0
+#define UTF8_REJECT 1
+#include "utf8.h"
 #include <cstring>
-#include <fstream>
 #include <iostream>
 #include <memory>
-// #include <sstream>
-// #include <string>
 #include <unordered_map>
 #include <vector>
 
+// # include "utf8.h"
+// TODO: pull this utf8 from github
+// curl -O https://raw.githubusercontent.com/sheredom/utf8.h/master/utf8
+
+
 using namespace std;
 
-
+// Trie veri yapısının düğüm sınıfı
 struct Node {
-  bool end = false;
-  unordered_map<char, unique_ptr<Node>> next;
+  bool end = false; // Bir kelimenin bittiğini işaretler
+  unordered_map<utf8_int32_t, unique_ptr<Node>>
+      next; // Her karakterin sonraki düğümünü tutar
 };
 
+// Trie'nin kök düğümü
 static unique_ptr<Node> root;
 
-
+// Kelime listesinden Trie yapısını oluşturur
 extern "C" void init_trie(const char **words, int count) {
+  // Yeni bir kök düğüm oluştur
   root = make_unique<Node>();
+  cout << "Initializing trie with " << count << " words" << endl;
 
+  // Her kelime için Trie'ye ekleme yap
   for (int i = 0; i < count; i++) {
-    // to_lower(words[i]);
     const char *w = words[i];
     Node *current = root.get();
 
-    for (int j = 0; w[j]; j++) {
-      char c = w[j];
+    // UTF-8 string üzerinde karakter karakter işlem yap
+    const utf8_int8_t *it = (const utf8_int8_t *)w; // Kelimenin başlangıcı
+    const utf8_int8_t *end = it + strlen(w);        // Kelimenin sonu
+
+    // Kelimeyi karakter karakter işle
+    while (it < end) {
+      utf8_int32_t c; // Unicode karakter değeri
+      it = (const utf8_int8_t *)utf8codepoint(
+          it, &c); // Bir sonraki UTF-8 karakteri oku
+
+      // Eğer karakter için düğüm yoksa yeni düğüm oluştur
       if (!current->next[c]) {
         current->next[c] = make_unique<Node>();
       }
       current = current->next[c].get();
     }
-    current->end = true;
+    current->end = true; // Kelimenin bittiğini işaretle
   }
+  cout << "Trie initialization complete" << endl;
 }
 
+// Verilen kelimenin Trie yapısında olup olmadığını kontrol eder
 extern "C" bool trie_contains(const char *word) {
+  if (!root)
+    return false; // Trie boşsa false dön
+
   Node *current = root.get();
-  // to_lower(word);
-  for (int i = 0; word[i]; i++) {
-    char c = word[i];
-    auto it = current->next.find(c);
-    if (it == current->next.end()) {
+  cout << "Searching for word: " << word << endl;
+
+  // UTF-8 string üzerinde karakter karakter işlem yap
+  const utf8_int8_t *it = (const utf8_int8_t *)word; // Kelimenin başlangıcı
+  const utf8_int8_t *end = it + strlen(word);        // Kelimenin sonu
+
+  // Kelimeyi karakter karakter kontrol et
+  while (it < end) {
+    utf8_int32_t c; // Unicode karakter değeri
+    it = (const utf8_int8_t *)utf8codepoint(
+        it, &c); // Bir sonraki UTF-8 karakteri oku
+
+    // Karakter Trie'de var mı kontrol et
+    auto next_it = current->next.find(c);
+    if (next_it == current->next.end()) {
+      // Karakter bulunamadıysa debug bilgisi yazdır ve false dön
+      utf8_int8_t buf[8];
+      utf8_int8_t *p = buf;
+      p = utf8catcodepoint(p, c, sizeof(buf));
+      *p = '\0';
+      cout << "Character '" << buf << "' not found in trie" << endl;
       return false;
     }
-    current = it->second.get();
+    current = next_it->second.get();
   }
-  return current->end;
+
+  // Kelime bulundu mu kontrol et
+  cout << "Word " << (current->end ? "found" : "not found as complete word")
+       << endl;
+  return current->end; // Kelimenin tam olarak bitip bitmediğini kontrol et
 }
 
-
-
+// Binary dosyadan kelime listesini okuyup Trie yapısını oluşturur
 extern "C" void init_trie_from_bin() {
-  FILE* bin_file = fopen("words.dat", "rb");
+  // Binary dosyayı aç
+  FILE *bin_file = fopen("words.dat", "rb");
   if (bin_file == NULL) {
-      std::cout << "Not found!";
-      exit(-1);
+    cout << "words.dat not found!" << endl;
+    exit(-1);
   }
-  char *data[5];
-  fread(&data,sizeof(char), 5, bin_file);
-  std::cout << data;
 
-  // ifstream file("words.dat", ios::binary);
-  // vector<char> buffer((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+  // Kelime sayısını oku (ilk 4 byte)
+  uint32_t word_count;
+  fread(&word_count, sizeof(uint32_t), 1, bin_file);
+  cout << "Reading " << word_count << " words from binary file" << endl;
 
-  // vector<const char*> wordPtrs;
-  // char* ptr = buffer.data();
-  // while (ptr < buffer.data() + buffer.size()) {
-  //   wordPtrs.push_back(ptr);
-  //   ptr += strlen(ptr) + 1;
-  // }
-  //
-  // init_trie(wordPtrs.data(), wordPtrs.size());
-}
+  // Tüm kelimeleri oku
+  vector<string> words;
+  for (uint32_t i = 0; i < word_count; i++) {
+    // Kelime uzunluğunu oku (1 byte)
+    uint8_t len;
+    fread(&len, 1, 1, bin_file);
 
-// static string trim(const string &s) {
-//   size_t b = 0, e = s.size();
-//   while (b < e && (s[b] == ' ' || s[b] == '\t' || s[b] == '\r' || s[b] == '\n'))
-//     ++b;
-//   while (e > b && (s[e - 1] == ' ' || s[e - 1] == '\t' || s[e - 1] == '\r' ||
-//                    s[e - 1] == '\n'))
-//     --e;
-//   return s.substr(b, e - b);
-// }
+    // Kelimeyi oku
+    vector<char> word_buffer(len + 1);
+    fread(word_buffer.data(), 1, len, bin_file);
+    word_buffer[len] = '\0'; // String sonunu işaretle
 
-// static vector<string> load_words(const string &path) {
-//   vector<string> words;
-//   ifstream file(path);
-//   string line;
-//   if (!file.is_open()) {
-//     cerr << "File opening error! " << path << "\n";
-//     return words;
-//   }
-//
-//   while (getline(file, line)) {
-//     istringstream ss(line);
-//     string w;
-//     while (getline(ss, w, ',')) {
-//       w = trim(w);
-//       if (!w.empty()) {
-//         words.push_back(w);
-//       }
-//     }
-//   }
-//   return words;
-// }
+    words.push_back(word_buffer.data());
+    if (i < 10) {
+      cout << "Read word: " << word_buffer.data() << endl;
+    }
+  }
+  fclose(bin_file);
 
-
-int main(int argc, char *argv[]) {
-    
-  init_trie_from_bin();
-
-  // string query;
-  // cout << "Search word: ";
-  // while (cin >> query) {
-  //   cout << query << " -> " << (trie_contains(query.c_str()) ? "Yes" : "No")
-  //        << "\n";
-  //   cout << "Search word: ";
-  // }
-
-  return 0;
+  // Okunan kelimelerden Trie yapısını oluştur
+  vector<const char *> word_ptrs;
+  for (const auto &word : words) {
+    word_ptrs.push_back(word.c_str());
+  }
+  init_trie(word_ptrs.data(), word_ptrs.size());
 }
