@@ -42,8 +42,8 @@ def get_app(lifespan=lifespan):
     app.include_router(wordle_router)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[],
-        allow_origin_regex=r"https://.*\.onrender\.com$",
+        allow_origins=["https://hekat.onrender.com"],
+        # allow_origin_regex=r"https://.*\.onrender\.com$",
         # allow_origin_regex=r"^https://.*\.ngrok-free\.app$",
         # allow_origins=[
         #     "https://my-fastapi-app.onrender.com",
