@@ -66,6 +66,10 @@ app = get_app(lifespan=lifespan)
 async def favicon():
     return RedirectResponse(url="/wordle/favicon.ico")
 
+@app.get("/")
+async def redirect_to_ui():
+    return RedirectResponse(url="/wordle")
+
 @app.get("/api/.*", status_code=404, include_in_schema=False)
 def invalid_api():
     return None
