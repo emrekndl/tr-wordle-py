@@ -31,8 +31,8 @@ function toastWarning(message) {
         style: {
             background: "linear-gradient(to right, #00b09b,rgb(221, 184, 20))",
         },
-        avatar: "https://cdn-icons-png.flaticon.com/128/4534/4534727.png",
-        // avatar: "https://cdn-icons-png.flaticon.com/128/3898/3898117.png",
+        // avatar: "https://cdn-icons-png.flaticon.com/128/4534/4534727.png",
+        avatar: "img/4534727.png",
     }).showToast();
 }
 
@@ -822,3 +822,4 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   }
 });
+
