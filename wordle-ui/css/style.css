@@ -11,6 +11,7 @@ body {
   justify-content: flex-start;
   min-height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* Uygulama konteyneri */
@@ -121,12 +122,13 @@ body {
 
 /* Konfeti Efekti */
 .confetti {
-  position: absolute;
+  position: fixed;
   width: 10px;
   height: 10px;
   z-index: 1;
   animation: fall linear forwards;
   border-radius: 2px;
+  pointer-events: none;
 }
 
 @keyframes fall {
