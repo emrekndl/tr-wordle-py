@@ -43,8 +43,10 @@ def get_app(lifespan=lifespan):
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[],
-        allow_origin_regex=r"^https://.*\.ngrok-free\.app$",
+        allow_origin_regex=r"https://.*\.onrender\.com$",
+        # allow_origin_regex=r"^https://.*\.ngrok-free\.app$",
         # allow_origins=[
+        #     "https://my-fastapi-app.onrender.com",
         #     "http://localhost:8000",
         #     "http://127.0.0.1:8000",
         #     "http://0.0.0.0:8000",

@@ -1,7 +1,7 @@
 [project]
-name = "wordle-py"
+name = "tr-wordle-py"
 version = "0.1.0"
-description = "Turkish Wordle Game API With FastAPI"
+description = "Turkish Wordle Game With FastAPI"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -11,12 +11,12 @@ dependencies = [
     "pydantic>=2.10.6",
     "sqlalchemy>=2.0.40",
     "uvicorn>=0.34.0",
+    "beautifulsoup4>=4.13.3",
+    "lxml>=5.3.2",
+    "requests>=2.32.3",
 ]
 
 [dependency-groups]
 dev = [
-    "beautifulsoup4>=4.13.3",
     "ipdb>=0.13.13",
-    "lxml>=5.3.2",
-    "requests>=2.32.3",
 ]
