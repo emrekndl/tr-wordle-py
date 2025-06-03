@@ -48,13 +48,13 @@ body {
   justify-content: center;
 }
 .square {
-  width: 50px;
-  height: 50px;
+  width: 60px;  /* 50px'den 60px'e */
+  height: 60px; /* 50px'den 60px'e */
   border: 4px solid #3a3a3c;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.8rem; /* 1.5rem'den 1.8rem'e */
   text-transform: uppercase;
   font-weight: bold;
   transition: transform 0.2s ease;
@@ -466,9 +466,9 @@ body {
     font-size: 1.75rem;
   }
   .square {
-    width: 40px;
-    height: 40px;
-    font-size: 1.2rem;
+    width: 50px;  /* 40px'den 50px'e */
+    height: 50px; /* 40px'den 50px'e */
+    font-size: 1.5rem; /* 1.2rem'den 1.5rem'e */
   }
   .keyboard {
     margin-top: 1.5rem;
@@ -495,6 +495,11 @@ body {
   }
   .title {
     font-size: 1.5rem;
+  }
+  .square {
+    width: 45px;  /* Yeni boyut */
+    height: 45px; /* Yeni boyut */
+    font-size: 1.4rem; /* Yeni font boyutu */
   }
   .keyboard {
     padding: 8px 4px;

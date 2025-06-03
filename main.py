@@ -2,7 +2,7 @@ import logging
 import logging.config
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -61,10 +61,13 @@ def get_app(lifespan=lifespan):
 app = get_app(lifespan=lifespan)
 
 
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return RedirectResponse(url="/wordle/favicon.ico")
+
 @app.get("/api/.*", status_code=404, include_in_schema=False)
 def invalid_api():
     return None
-
 
 @app.get("/.*", include_in_schema=False)
 def root():
