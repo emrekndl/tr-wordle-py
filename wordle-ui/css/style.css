@@ -420,18 +420,23 @@ body {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+
 /* Wordle renkleri */
 .color-1 {
-  background-color: #6aaa64;
+  background-color: #538d4e;
+  /* background-color: #6aaa64; */
 } /* Yeşil */
 .color-2 {
-  background-color: #c9b458;
+  background-color: #b59f3b;
+  /* background-color: #c9b458; */
 } /* Sarı */
 .color-3 {
-  background-color: #f5793a;
+  background-color: #3a3a3c;
+  /* background-color: #f5793a; */
 } /* Turuncu */
 .color-4 {
-  background-color: #85c0f9;
+  background-color: #5ab6f3;
+  /* background-color: #85c0f9; */
 } /* Mavi */
 
 @media (max-width: 768px) {

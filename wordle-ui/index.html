@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tanımalı Hekat (Wordle)</title>
-    <!-- <link rel="icon" type="image/x-icon" sizes="16x16" href="/favicon-16.png"> -->
-    <!-- <link rel="icon" href="/favicon.ico"> -->
-    <link rel="shortcut icon" href="#">
+    <link rel="icon" href="/favicon.ico">
+    <!-- <link rel="shortcut icon" href="#"> -->
     <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href=" https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.css " rel="stylesheet">
   </head>
   <body>
     <div class="container">
@@ -16,7 +16,7 @@
       <div class="title-container">
         <div class="title">
             <div class="word" id="word1"></div>
-            <div class="word" id="word2"></div>
+            <!-- <div class="word" id="word2"></div> -->
         </div>
     </div>
       <!-- <div class="title">Tanımalı Hekat (Wordle)</div> -->
@@ -121,14 +121,15 @@
         <button id="shareButton"><i class="fas fa-share-alt icon"></i>Paylaş</button>
       </div>
     </div>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    <script src=" https://cdn.jsdelivr.net/npm/toastify-js@1.12.0/src/toastify.min.js "></script>
     <script type="module" src="js/main.js"></script>
     <script>
-        // Kelimeleri ayır
-        const word1 = "TANIMALI";
-        const word2 = "HEKAT";
+        // const word1 = "TANIMALI";
+        const word1 = "HEKAT";
         
         // Wordle renk sınıfları
-        const colors = ['color-1', 'color-2', 'color-3', 'color-4'];
+        const colors = ['color-1', 'color-2', 'color-3'];
         
         // İlk kelime için harfleri oluştur
         const word1Element = document.getElementById('word1');
@@ -144,17 +145,16 @@
         }
         
         // İkinci kelime için harfleri oluştur
-        const word2Element = document.getElementById('word2');
-        for (let i = 0; i < word2.length; i++) {
-            const char = word2[i];
-            const letter = document.createElement('div');
-            letter.className = 'letter';
-            letter.textContent = char;
-            // Rastgele bir renk sınıfı seç
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            letter.classList.add(randomColor);
-            word2Element.appendChild(letter);
-        }
+        // const word2Element = document.getElementById('word2');
+        // for (let i = 0; i < word2.length; i++) {
+        //     const char = word2[i];
+        //     const letter = document.createElement('div');
+        //     letter.className = 'letter';
+        //     letter.textContent = char;
+        //     const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        //     letter.classList.add(randomColor);
+        //     word2Element.appendChild(letter);
+        // }
     </script>
 
   </body>
