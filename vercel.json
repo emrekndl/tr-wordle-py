@@ -10,17 +10,6 @@
       "src": "/(.*)",
       "dest": "main.py"
     }
-  ],
-  "excludeFiles": [
-    "**/*.pyc",
-    "**/__pycache__/**",
-    ".git/**",
-    ".venv/**",
-    "Dockerfile",
-    "README.md",
-    "EN-README.md",
-    "uv.lock",
-    "package.json"
   ]
 }
 
