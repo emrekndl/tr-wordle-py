@@ -38,12 +38,13 @@ async def lifespan(app: FastAPI):
 
 def get_app(lifespan=lifespan):
     app = FastAPI(lifespan=lifespan, title="Wordle API", version="1.0.0")
-    app.mount("/wordle", StaticFiles(directory="wordle-ui", html=True), name="static")
+    app.mount("/wordle", StaticFiles(directory="wordle-ui",
+              html=True), name="static")
     app.include_router(wordle_router)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["https://hekat.onrender.com"],
-        # allow_origin_regex=r"https://.*\.onrender\.com$",
+        # allow_origins=["https://hekat.onrender.com"],
+        allow_origin_regex=r"^https:\/\/(.*\.vercel\.app|.*\.onrender\.com)$",
         # allow_origin_regex=r"^https://.*\.ngrok-free\.app$",
         # allow_origins=[
         #     "https://my-fastapi-app.onrender.com",
@@ -66,13 +67,16 @@ app = get_app(lifespan=lifespan)
 async def favicon():
     return RedirectResponse(url="/wordle/favicon.ico")
 
+
 @app.get("/")
 async def redirect_to_ui():
     return RedirectResponse(url="/wordle")
 
+
 @app.get("/api/.*", status_code=404, include_in_schema=False)
 def invalid_api():
     return None
+
 
 @app.get("/.*", include_in_schema=False)
 def root():
@@ -87,17 +91,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-## Checklist
-
-# [x] check word
-# [x] check guess
-# [x] create word
-# [x] get wordlist
-# [X] is_complete not correct!!!(same letter in sets not counting)
-# [X] guess only 6 times
-# [X] get random word( word list len mod), web site crawler
-# [X] project directory structure setup
-# [X] word of the day save in cache -> need test!
-# [X] /check not working correctly!!!
-# [ ] check guessed word is valid turkish word (bloomfilter, wasm)
