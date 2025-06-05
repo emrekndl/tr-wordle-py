@@ -1,5 +1,4 @@
-# import logging
-# import logging.config
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -8,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from dotenv import load_dotenv
 
 from db.database import get_db
 from utils.wordle_utils import init_db
@@ -17,8 +17,8 @@ from log_config import LOGGING_CONFIG
 
 
 scheduler = BackgroundScheduler(timezone="Europe/Istanbul")
-
-# logging.config.dictConfig(LOGGING_CONFIG)
+load_dotenv()
+ALLOW_ORIGIN = os.getenv("ALLOW_ORIGIN", "http://0.0.0.0:8000")
 
 
 @asynccontextmanager
@@ -43,15 +43,8 @@ def get_app(lifespan=lifespan):
     app.include_router(wordle_router)
     app.add_middleware(
         CORSMiddleware,
-        # allow_origins=["https://hekat.onrender.com"],
-        allow_origin_regex=r"^https:\/\/(.*\.vercel\.app|.*\.onrender\.com)$",
+        allow_origins=[ALLOW_ORIGIN],
         # allow_origin_regex=r"^https://.*\.ngrok-free\.app$",
-        # allow_origins=[
-        #     "https://my-fastapi-app.onrender.com",
-        #     "http://localhost:8000",
-        #     "http://127.0.0.1:8000",
-        #     "http://0.0.0.0:8000",
-        # ],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -86,7 +79,8 @@ def root():
 def main():
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_config=LOGGING_CONFIG)
+    uvicorn.run("main:app", host="0.0.0.0",
+                port=8000, log_config=LOGGING_CONFIG)
 
 
 if __name__ == "__main__":

@@ -36,5 +36,5 @@ def get_gamerecord_or_create_gamerecord_with_token(db: Session, token: str):
     except SQLAlchemyError:
         db.rollback()
         logger.error(
-            "Database error in get_or_create_gamerecord", exc_info=True)
+            "Database error in get_gamerecord_or_create_gamerecord_with_token", exc_info=True)
         raise
