@@ -1,11 +1,12 @@
 import logging
 import pathlib
+import hashlib
 from datetime import datetime
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 WORD_LIST_PATH = "data/wordlist.txt"
+
 
 def tr_lower(word):
     """Turkish uppercase letters
@@ -28,6 +29,16 @@ def tr_lower(word):
     return word
 
 
+"""
+   today_str = datetime.now().strftime("%Y-%m-%d")
+    # Örnek: b"2025-06-05"
+    h = hashlib.sha256(today_str.encode()).digest()
+    # Birkaç byte’ı tam sayıya çevir ve mod al
+    idx = int.from_bytes(h[:4], "big") % len(wordlist)
+    return tr_lower(wordlist[idx])
+"""
+
+
 def get_daily_word(wordlist):
     """Get a random five-letter word from a list of strings.
     Example:
@@ -35,36 +46,35 @@ def get_daily_word(wordlist):
     "HELLO"
     """
     # words count: 5683
-    if words := [
-        word
-        for word in wordlist
-        if len(word) == 5 and word.isalpha()
-        # re.fullmatch(r"[^\W0-9_]+", word)
-    ]:
-        epoch = datetime(2025, 3, 30)
-        now = datetime.now()
-        # now = datetime.now() + timedelta(days=2)
-        # ms_in_day = 24 * 60 * 60 * 1000
-        # index = math.floor((now - epoch) / ms_in_day) % len(words)
-        delta_days = (now - epoch).days
-        index = delta_days % len(words)
+    if wordlist:
+        today_str = datetime.now().strftime("%Y-%m-%d")
+        h = hashlib.sha256(today_str.encode()).digest()
+        idx = int.from_bytes(h[:4], "big") % len(wordlist)
+        # epoch = datetime(2025, 3, 30)
+        # now = datetime.now()
+        # delta_days = (now - epoch).days
+        # index = delta_days % len(words)
 
-        return tr_lower(words[index]).lower()
+        return tr_lower(wordlist[idx]).lower()
 
     else:
-        logger.error("No words of length 5 in the word list")
+        logger.error("No suitable words were found in the word list")
         return None
 
 
 def get_wordlist():
+    """ Read the wordlist file and return suitable words"""
     wordlistpath = pathlib.Path(__file__).parent.parent / WORD_LIST_PATH
 
-    wordlist = wordlistpath.read_text(encoding="utf-8").splitlines()
-
-    return wordlist
+    return [word.strip()
+            for word in wordlistpath.read_text(encoding="utf-8").splitlines()
+            if len(word) == 5 and word.isalpha()
+            ]
+    # re.fullmatch(r"[^\W0-9_]+", word)
 
 
 def get_wordle():
+    """ Return a random daily word """
     wl = get_wordlist()
     return get_daily_word(wl)
 

@@ -40,13 +40,12 @@ def check_guessed_word(guessed_word: str, db: Session, game: Game_Record):
     word = set_word_to_cache()
     logger.debug(f"check_guessed_word: {guessed_word} Word: {word}")
     res = Gusess_Response(**check(guessed_word, word))
-    if res.is_complete:
-        game[0].guess_count = 6
-        db.commit()
 
+    if res.is_complete:
         res.word_definition = set_word_definition_to_cache(word)
         logger.debug(f"word_definition: {res.word_definition}")
-    if not res.is_complete and game[0].guess_count == 6:
+
+    if not res.is_complete and game.guess_count == 6:
         res.word_definition = set_word_definition_to_cache(word)
         res.is_complete = True
     logger.debug(f"Guesss_Response: {res}")

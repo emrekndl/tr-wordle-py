@@ -7,14 +7,6 @@ from pydantic import BaseModel, Field
 from db.database import Base
 
 
-# class Word_Of_The_Day(Base):
-#     __tablename__ = "word_of_the_day"
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     word = Column(String, index=True)
-#     date = Column(Date, default=date.today)
-
-
 class Game_Record(Base):
     __tablename__ = "game_record"
 

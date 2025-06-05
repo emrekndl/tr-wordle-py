@@ -1,5 +1,5 @@
-import logging
-import logging.config
+# import logging
+# import logging.config
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -18,7 +18,7 @@ from log_config import LOGGING_CONFIG
 
 scheduler = BackgroundScheduler(timezone="Europe/Istanbul")
 
-logging.config.dictConfig(LOGGING_CONFIG)
+# logging.config.dictConfig(LOGGING_CONFIG)
 
 
 @asynccontextmanager
@@ -86,7 +86,7 @@ def root():
 def main():
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_config=LOGGING_CONFIG)
 
 
 if __name__ == "__main__":

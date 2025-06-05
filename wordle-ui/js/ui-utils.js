@@ -75,10 +75,8 @@ export function showCompleteModal(response = {}, savedModalState = null) {
             ? "#6aaa64"
             : "#dc3545";
     } else {
-        const matches = attemptCount.textContent.match(/(\d+)\/(\d+)/);
-        const currentRow = matches ? parseInt(matches[1]) : 1;
+        const currentRow = response.currentRow || 1;
         attemptCount.textContent = `${currentRow}/6`;
-
         let isCorrectGuess = false;
         if (response.correct_letters) {
             const correctLetters = Object.values(response.correct_letters);

@@ -91,13 +91,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                 return;
             }
 
-            usedGuesses.add(guess);
             const response = await checkGuess(guess, toLocaleLowerCase);
             if (!response) {
                 toastWarning("Cevap alınamadı!");
                 return;
             }
 
+            usedGuesses.add(guess);
             handleGuessResponse(response, toLocaleLowerCase);
         } else {
             handleIncompleteWord();
@@ -219,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         attemptCount: `${currentRow + 1}/${maxRows}`,
                         isComplete: isCorrectGuess,
                     };
-
+                    response.currentRow = currentRow + 1;
                     saveGameState(currentRow, currentSquareIndex, rows, usedGuesses, true, modalData);
                     if (isCorrectGuess) {
                         // Show confetti immediately after flip animation

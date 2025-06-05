@@ -4,7 +4,6 @@ from typing import List, Dict
 from requests.exceptions import JSONDecodeError
 
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 session = requests.Session()
