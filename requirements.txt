@@ -36,6 +36,8 @@ pydantic==2.10.6
     #   tr-wordle-py
 pydantic-core==2.27.2
     # via pydantic
+python-dotenv==1.1.0
+    # via tr-wordle-py
 requests==2.32.3
     # via tr-wordle-py
 sniffio==1.3.1
