@@ -18,8 +18,8 @@ from log_config import LOGGING_CONFIG
 
 scheduler = BackgroundScheduler(timezone="Europe/Istanbul")
 load_dotenv()
-ALLOW_ORIGIN = os.getenv("ALLOW_ORIGIN", "http://0.0.0.0:8000")
-
+# ALLOW_ORIGIN = os.getenv("ALLOW_ORIGIN", "http://0.0.0.0:8000")
+ALLOW_ORIGIN_REGEX = os.getenv("ALLOW_ORIGIN_REGEX")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,7 +43,8 @@ def get_app(lifespan=lifespan):
     app.include_router(wordle_router)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[ALLOW_ORIGIN],
+        # allow_origins=[ALLOW_ORIGIN],
+        allow_origin_regex=ALLOW_ORIGIN_REGEX,
         # allow_origin_regex=r"^https://.*\.ngrok-free\.app$",
         allow_credentials=True,
         allow_methods=["*"],
