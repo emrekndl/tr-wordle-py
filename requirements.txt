@@ -30,8 +30,10 @@ lxml==5.3.2
     # via tr-wordle-py
 numpy==2.2.4
     # via tr-wordle-py
-psycopg2==2.9.10
-    # via tr-wordle-py
+psycopg2-binary==2.9.10
+    # via vercel error
+# psycopg2==2.9.10
+#     # via tr-wordle-py
 pydantic==2.10.6
     # via
     #   fastapi
