@@ -30,7 +30,7 @@ What makes this implementation special:
 ### Backend
 - FastAPI
 - APScheduler (for daily word resets)
-- SQLite
+- **PostgreSQL** (via Docker Compose)
 - Python 3.11+
 
 ### Frontend
@@ -52,22 +52,28 @@ git clone https://github.com/emrekndl/tr-wordle-py.git
 cd tr-wordle-py
 ```
 
-2. Install uv (if not already installed [uv](https://docs.astral.sh/uv/)):
+2. Copy the example environment file and edit if needed:
+```bash
+cp .env_bak .env
+# Edit .env if you want to change database credentials or settings
+```
+
+3. Install uv (if not already installed [uv](https://docs.astral.sh/uv/)):
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-3. Install dependencies using uv:
+4. Install dependencies using uv:
 ```bash
 uv sync
 ```
 
-4. Create a virtual environment and activate it:
+5. Create a virtual environment and activate it:
 ```bash
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 ```
 
-5. Configure CORS settings:
+6. Configure CORS settings:
 Edit the CORS middleware settings in main.py:
 ```python
 app.add_middleware(
@@ -79,14 +85,27 @@ app.add_middleware(
 )
 ```
 
-6. Run the application:
+7. Run the application:
 ```bash
 python main.py
 ```
 
-The application will be available at `http://localhost:8000/wordle/`
+Alternatively, you can start the application using containers (recommended for PostgreSQL setup):
+```bash
+podman-compose -f docker-compose.yml up   # (Docker equivalent: docker compose -f docker-compose.yml up)
+```
 
-Note: uv is a new, extremely fast Python package installer and resolver. It's written in Rust and designed to be a drop-in replacement for pip, providing much faster dependency resolution and installation.
+- This will start both the FastAPI app and a PostgreSQL database using the settings in `.env`.
+- The application will be available at `http://localhost:8000/wordle/`.
+
+**Note:**  
+- The application now uses **PostgreSQL** as the database (not SQLite).  
+- All database connection settings are managed via the `.env` file.  
+- If you want to run only PostgreSQL (for development), you can use:
+  ```bash
+  podman-compose -f compose-postgresql.yml up
+  # (Docker equivalent: docker compose -f compose-postgresql.yml up)
+  ```
 
 ## Project Structure
 
@@ -104,7 +123,6 @@ tr-wordle-py/
     ├── js/           # JavaScript modules
     └── img/          # Images and assets
 ```
-
 
 ### Demo
 <div style="display: flex; justify-content: center;">
@@ -139,7 +157,6 @@ The application uses multiple caching levels:
 - Words are randomly selected from a curated list of 5-letter Turkish words
 - The word of the day is synchronized for all users
 - APScheduler ensures word rotation at midnight (Europe/Istanbul timezone)
-
 
 ## License
 

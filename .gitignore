@@ -21,3 +21,6 @@ utils/word_crawler.py
 
 # vscode
 .vscode/
+
+# db-data
+db-data/

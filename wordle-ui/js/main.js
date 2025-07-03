@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", async function () {
      */
     async function handleEnterKey() {
         if (currentSquareIndex === maxSquares) {
+            disableKeyboard(); // <-- Klavyeyi devre dışı bırak
             const guess = Array.from(rows[currentRow].querySelectorAll(".square"))
                 .map(square => square.textContent)
                 .join("");
@@ -76,6 +77,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             if (usedGuesses.has(guess)) {
                 toastWarning("Bir kelimeyi iki kez sayamayız!");
                 clearCurrentRow();
+                enableKeyboard(); // <-- Hata durumunda tekrar etkinleştir
                 return;
             }
 
@@ -84,21 +86,24 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const isValidWord = await checkWordInBloomFilter(lowercaseGuess);
                 if (!isValidWord) {
                     handleInvalidWord();
+                    enableKeyboard(); // <-- Hata durumunda tekrar etkinleştir
                     return;
                 }
             } catch (error) {
                 console.error("Bloom filter kontrolünde hata:", error);
+                enableKeyboard(); // <-- Hata durumunda tekrar etkinleştir
                 return;
             }
 
             const response = await checkGuess(guess, toLocaleLowerCase);
             if (!response) {
                 toastWarning("Cevap alınamadı!");
+                enableKeyboard(); // <-- Hata durumunda tekrar etkinleştir
                 return;
             }
 
             usedGuesses.add(guess);
-            handleGuessResponse(response, toLocaleLowerCase);
+            handleGuessResponse(response, true); // <-- 2. parametre ile kontrol
         } else {
             handleIncompleteWord();
         }
@@ -188,9 +193,8 @@ document.addEventListener("DOMContentLoaded", async function () {
      * API'den gelen tahmin sonucunu işler
      * Animasyonları gösterir ve oyun durumunu günceller
      * @param {Object} response API yanıtı
-     * @param {Function} toLocaleLowerCaseFn Türkçe lowercase dönüşüm fonksiyonu
      */
-    function handleGuessResponse(response, toLocaleLowerCaseFn) {
+    function handleGuessResponse(response, shouldEnableKeyboard = false) {
         let isCorrectGuess = false;
         if (response.correct_letters) {
             const correctLetters = Object.values(response.correct_letters);
@@ -209,6 +213,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     currentRow++;
                     currentSquareIndex = 0;
                     saveGameState(currentRow, currentSquareIndex, rows, usedGuesses, false);
+                    if (shouldEnableKeyboard) enableKeyboard(); // <-- Sadece oyun bitmediyse tekrar aç
                 } else {
                     const modalData = {
                         title: isCorrectGuess ? "Tebrikler 🎉" : "Oyun Bitti",
@@ -222,19 +227,16 @@ document.addEventListener("DOMContentLoaded", async function () {
                     response.currentRow = currentRow + 1;
                     saveGameState(currentRow, currentSquareIndex, rows, usedGuesses, true, modalData);
                     if (isCorrectGuess) {
-                        // Show confetti immediately after flip animation
                         createConfetti();
-                        // Show modal with a slight delay after confetti
                         setTimeout(() => {
                             showCompleteModal(response);
                         }, 800);
                     } else {
-                        // If game is lost, just show the modal
                         setTimeout(() => {
                             showCompleteModal(response);
                         }, 500);
                     }
-                    disableKeyboard();
+                    // Oyun bittiğinde klavye zaten devre dışı kalacak
                 }
             }
         }, toLocaleLowerCase);

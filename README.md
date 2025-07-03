@@ -31,7 +31,7 @@ Bu uygulamayı özel kılan özellikler:
 ### Backend
 - FastAPI
 - APScheduler (günlük kelime yenileme için)
-- SQLite
+- **PostgreSQL** (Docker Compose ile)
 - Python 3.11+
 
 ### Frontend
@@ -53,22 +53,28 @@ git clone https://github.com/emrekndl/tr-wordle-py.git
 cd tr-wordle-py
 ```
 
-2. uv paket yöneticisini yükleyin (kurulu değilse [uv](https://docs.astral.sh/uv/)):
+2. Örnek ortam dosyasını kopyalayın ve gerekirse düzenleyin:
+```bash
+cp .env_bak .env
+# Veritabanı bilgilerini veya ayarları değiştirmek için .env dosyasını düzenleyin
+```
+
+3. uv paket yöneticisini yükleyin (kurulu değilse [uv](https://docs.astral.sh/uv/)):
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-3. Bağımlılıkları uv ile yükleyin:
+4. Bağımlılıkları uv ile yükleyin:
 ```bash
 uv sync
 ```
 
-4. Sanal ortamı aktifleştirin:
+5. Sanal ortamı aktifleştirin:
 ```bash
 source .venv/bin/activate  # Windows için: .venv\Scripts\activate
 ```
 
-5. CORS ayarlarını yapılandırın:
+6. CORS ayarlarını yapılandırın:
 main.py dosyasında CORS middleware ayarlarını düzenleyin:
 ```python
 app.add_middleware(
@@ -80,14 +86,27 @@ app.add_middleware(
 )
 ```
 
-6. Uygulamayı çalıştırın:
+7. Uygulamayı çalıştırın:
 ```bash
 python main.py
 ```
 
-Uygulama `http://localhost:8000/wordle/` adresinde çalışmaya başlayacaktır.
+Alternatif olarak, uygulamayı konteynerler ile başlatmak için (PostgreSQL ile birlikte önerilir):
+```bash
+podman-compose -f docker-compose.yml up   # (Docker karşılığı: docker compose -f docker-compose.yml up)
+```
 
-Not: uv, pip'in yerine geçebilen, Rust ile yazılmış çok hızlı bir Python paket yükleyici ve çözümleyicisidir. Bağımlılık çözümleme ve kurulum işlemlerini çok daha hızlı gerçekleştirir.
+- Bu komut hem FastAPI uygulamasını hem de PostgreSQL veritabanını `.env` dosyasındaki ayarlarla başlatır.
+- Uygulama `http://localhost:8000/wordle/` adresinde çalışacaktır.
+
+**Not:**  
+- Uygulama artık **PostgreSQL** veritabanı kullanıyor (SQLite değil).  
+- Tüm veritabanı bağlantı ayarları `.env` dosyasından yönetilir.  
+- Sadece PostgreSQL başlatmak için (geliştirme amaçlı):
+  ```bash
+  podman-compose -f compose-postgresql.yml up
+  # (Docker karşılığı: docker compose -f compose-postgresql.yml up)
+  ```
 
 ## Proje Yapısı
 
@@ -105,7 +124,6 @@ tr-wordle-py/
     ├── js/            # JavaScript modülleri
     └── img/           # Görseller
 ```
-
 
 ### Demo
 <div style="display: flex; justify-content: center;">
@@ -141,7 +159,7 @@ Uygulama birden fazla önbellekleme seviyesi kullanır:
 - Günün kelimesi tüm kullanıcılar için senkronize edilir
 - APScheduler ile gece yarısında (Europe/Istanbul saat dilimi) kelime yenilenir
 
-
 ## Lisans
 
 MIT Lisansı. Detaylar için [LICENSE](LICENSE) dosyasına bakınız.
+
